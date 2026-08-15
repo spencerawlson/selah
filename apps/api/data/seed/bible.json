@@ -1,0 +1,220 @@
+{
+  "_readme": [
+    "Sample Bible content for local development and demos.",
+    "Text is the World English Bible (WEB), which is in the public domain.",
+    "This is a HAND-ENTERED SUBSET — six complete chapters, not a full Bible.",
+    "Before any public release, replace it with a verified WEB import: see",
+    "scripts/import_bible.py, which ingests a standard WEB JSON dump and",
+    "recomputes chapter_count/verse_count from the imported data."
+  ],
+  "translation": {
+    "code": "WEB",
+    "name": "World English Bible",
+    "language": "en",
+    "license": "Public Domain",
+    "is_premium": false
+  },
+  "books": [
+    {
+      "slug": "genesis",
+      "name": "Genesis",
+      "abbreviation": "Gen",
+      "testament": "old",
+      "position": 1,
+      "blurb": "Beginnings — creation, the first families, and the promise that starts everything."
+    },
+    {
+      "slug": "psalms",
+      "name": "Psalms",
+      "reference_name": "Psalm",
+      "abbreviation": "Ps",
+      "testament": "old",
+      "position": 19,
+      "blurb": "Israel's songbook. Praise, grief, doubt and trust, addressed straight to God."
+    },
+    {
+      "slug": "john",
+      "name": "John",
+      "abbreviation": "Jn",
+      "testament": "new",
+      "position": 43,
+      "blurb": "The fourth Gospel, written so that readers would believe Jesus is the Son of God."
+    },
+    {
+      "slug": "1-corinthians",
+      "name": "1 Corinthians",
+      "abbreviation": "1Co",
+      "testament": "new",
+      "position": 46,
+      "blurb": "Paul's letter to a gifted, fractious young church about what love actually requires."
+    },
+    {
+      "slug": "philippians",
+      "name": "Philippians",
+      "abbreviation": "Php",
+      "testament": "new",
+      "position": 50,
+      "blurb": "A thank-you letter written from prison, and unreasonably full of joy."
+    }
+  ],
+  "chapters": [
+    {
+      "book": "genesis",
+      "number": 1,
+      "verses": [
+        "In the beginning, God created the heavens and the earth.",
+        "The earth was formless and empty. Darkness was on the surface of the deep and God's Spirit was hovering over the surface of the waters.",
+        "God said, \"Let there be light,\" and there was light.",
+        "God saw the light, and saw that it was good. God divided the light from the darkness.",
+        "God called the light \"day\", and the darkness he called \"night\". There was evening and there was morning, the first day.",
+        "God said, \"Let there be an expanse in the middle of the waters, and let it divide the waters from the waters.\"",
+        "God made the expanse, and divided the waters which were under the expanse from the waters which were above the expanse; and it was so.",
+        "God called the expanse \"sky\". There was evening and there was morning, a second day.",
+        "God said, \"Let the waters under the sky be gathered together to one place, and let the dry land appear;\" and it was so.",
+        "God called the dry land \"earth\", and the gathering together of the waters he called \"seas\". God saw that it was good.",
+        "God said, \"Let the earth yield grass, herbs yielding seeds, and fruit trees bearing fruit after their kind, with their seeds in it, on the earth;\" and it was so.",
+        "The earth yielded grass, herbs yielding seed after their kind, and trees bearing fruit, with their seeds in it, after their kind; and God saw that it was good.",
+        "There was evening and there was morning, a third day.",
+        "God said, \"Let there be lights in the expanse of the sky to divide the day from the night; and let them be for signs to mark seasons, days, and years;",
+        "and let them be for lights in the expanse of the sky to give light on the earth;\" and it was so.",
+        "God made the two great lights: the greater light to rule the day, and the lesser light to rule the night. He also made the stars.",
+        "God set them in the expanse of the sky to give light to the earth,",
+        "and to rule over the day and over the night, and to divide the light from the darkness. God saw that it was good.",
+        "There was evening and there was morning, a fourth day.",
+        "God said, \"Let the waters abound with living creatures, and let birds fly above the earth in the open expanse of the sky.\"",
+        "God created the large sea creatures and every living creature that moves, with which the waters swarmed, after their kind, and every winged bird after its kind. God saw that it was good.",
+        "God blessed them, saying, \"Be fruitful, and multiply, and fill the waters in the seas, and let birds multiply on the earth.\"",
+        "There was evening and there was morning, a fifth day.",
+        "God said, \"Let the earth produce living creatures after their kind, livestock, creeping things, and animals of the earth after their kind;\" and it was so.",
+        "God made the animals of the earth after their kind, and the livestock after their kind, and everything that creeps on the ground after its kind. God saw that it was good.",
+        "God said, \"Let's make man in our image, after our likeness. Let them have dominion over the fish of the sea, and over the birds of the sky, and over the livestock, and over all the earth, and over every creeping thing that creeps on the earth.\"",
+        "God created man in his own image. In God's image he created him; male and female he created them.",
+        "God blessed them. God said to them, \"Be fruitful, multiply, fill the earth, and subdue it. Have dominion over the fish of the sea, over the birds of the sky, and over every living thing that moves on the earth.\"",
+        "God said, \"Behold, I have given you every herb yielding seed, which is on the surface of all the earth, and every tree, which bears fruit yielding seed. It will be your food.",
+        "To every animal of the earth, and to every bird of the sky, and to everything that creeps on the earth, in which there is life, I have given every green herb for food;\" and it was so.",
+        "God saw everything that he had made, and, behold, it was very good. There was evening and there was morning, a sixth day."
+      ]
+    },
+    {
+      "book": "psalms",
+      "number": 23,
+      "verses": [
+        "Yahweh is my shepherd; I shall lack nothing.",
+        "He makes me lie down in green pastures. He leads me beside still waters.",
+        "He restores my soul. He guides me in the paths of righteousness for his name's sake.",
+        "Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me. Your rod and your staff, they comfort me.",
+        "You prepare a table before me in the presence of my enemies. You anoint my head with oil. My cup runs over.",
+        "Surely goodness and loving kindness shall follow me all the days of my life, and I will dwell in Yahweh's house forever."
+      ]
+    },
+    {
+      "book": "psalms",
+      "number": 100,
+      "verses": [
+        "Shout for joy to Yahweh, all you lands!",
+        "Serve Yahweh with gladness. Come before his presence with singing.",
+        "Know that Yahweh, he is God. It is he who has made us, and we are his. We are his people, and the sheep of his pasture.",
+        "Enter into his gates with thanksgiving, and into his courts with praise. Give thanks to him, and bless his name.",
+        "For Yahweh is good. His loving kindness endures forever, his faithfulness to all generations."
+      ]
+    },
+    {
+      "book": "john",
+      "number": 3,
+      "verses": [
+        "Now there was a man of the Pharisees named Nicodemus, a ruler of the Jews.",
+        "He came to Jesus by night and said to him, \"Rabbi, we know that you are a teacher come from God, for no one can do these signs that you do, unless God is with him.\"",
+        "Jesus answered him, \"Most certainly I tell you, unless one is born anew, he can't see God's Kingdom.\"",
+        "Nicodemus said to him, \"How can a man be born when he is old? Can he enter a second time into his mother's womb and be born?\"",
+        "Jesus answered, \"Most certainly I tell you, unless one is born of water and spirit, he can't enter into God's Kingdom.",
+        "That which is born of the flesh is flesh. That which is born of the Spirit is spirit.",
+        "Don't marvel that I said to you, 'You must be born anew.'",
+        "The wind blows where it wants to, and you hear its sound, but don't know where it comes from and where it is going. So is everyone who is born of the Spirit.\"",
+        "Nicodemus answered him, \"How can these things be?\"",
+        "Jesus answered him, \"Are you the teacher of Israel, and don't understand these things?",
+        "Most certainly I tell you, we speak that which we know and testify of that which we have seen, and you don't receive our witness.",
+        "If I told you earthly things and you don't believe, how will you believe if I tell you heavenly things?",
+        "No one has ascended into heaven but he who descended out of heaven, the Son of Man, who is in heaven.",
+        "As Moses lifted up the serpent in the wilderness, even so must the Son of Man be lifted up,",
+        "that whoever believes in him should not perish, but have eternal life.",
+        "For God so loved the world, that he gave his only born Son, that whoever believes in him should not perish, but have eternal life.",
+        "For God didn't send his Son into the world to judge the world, but that the world should be saved through him.",
+        "He who believes in him is not judged. He who doesn't believe has been judged already, because he has not believed in the name of the only born Son of God.",
+        "This is the judgment, that the light has come into the world, and men loved the darkness rather than the light, for their works were evil.",
+        "For everyone who does evil hates the light and doesn't come to the light, lest his works would be exposed.",
+        "But he who does the truth comes to the light, that his works may be revealed, that they have been done in God.\"",
+        "After these things, Jesus came with his disciples into the land of Judea. He stayed there with them and baptized.",
+        "John also was baptizing in Enon near Salim, because there was much water there. They came, and were baptized;",
+        "for John was not yet thrown into prison.",
+        "Therefore a dispute arose on the part of John's disciples with some Jews about purification.",
+        "They came to John and said to him, \"Rabbi, he who was with you beyond the Jordan, to whom you have testified, behold, he baptizes, and everyone is coming to him.\"",
+        "John answered, \"A man can receive nothing unless it has been given him from heaven.",
+        "You yourselves testify that I said, 'I am not the Christ,' but, 'I have been sent before him.'",
+        "He who has the bride is the bridegroom; but the friend of the bridegroom, who stands and hears him, rejoices greatly because of the bridegroom's voice. Therefore my joy is made full.",
+        "He must increase, but I must decrease.",
+        "He who comes from above is above all. He who is from the earth belongs to the earth and speaks of the earth. He who comes from heaven is above all.",
+        "What he has seen and heard, of that he testifies; and no one receives his witness.",
+        "He who has received his witness has set his seal to this, that God is true.",
+        "For he whom God has sent speaks the words of God; for God gives the Spirit without measure.",
+        "The Father loves the Son, and has given all things into his hand.",
+        "One who believes in the Son has eternal life, but one who disobeys the Son won't see life, but the wrath of God remains on him.\""
+      ]
+    },
+    {
+      "book": "1-corinthians",
+      "number": 13,
+      "verses": [
+        "If I speak with the languages of men and of angels, but don't have love, I have become sounding brass, or a clanging cymbal.",
+        "If I have the gift of prophecy, and know all mysteries and all knowledge; and if I have all faith, so as to remove mountains, but don't have love, I am nothing.",
+        "If I give away all my goods to feed the poor, and if I give my body to be burned, but don't have love, it profits me nothing.",
+        "Love is patient and is kind. Love doesn't envy. Love doesn't brag, is not proud,",
+        "doesn't behave itself inappropriately, doesn't seek its own way, is not provoked, takes no account of evil;",
+        "doesn't rejoice in unrighteousness, but rejoices with the truth;",
+        "bears all things, believes all things, hopes all things, endures all things.",
+        "Love never fails. But where there are prophecies, they will be done away with. Where there are various languages, they will cease. Where there is knowledge, it will be done away with.",
+        "For we know in part and we prophesy in part;",
+        "but when that which is complete has come, then that which is partial will be done away with.",
+        "When I was a child, I spoke as a child, I felt as a child, I thought as a child. Now that I have become a man, I have put away childish things.",
+        "For now we see in a mirror, dimly, but then face to face. Now I know in part, but then I will know fully, even as I was also fully known.",
+        "But now faith, hope, and love remain—these three. The greatest of these is love."
+      ]
+    },
+    {
+      "book": "philippians",
+      "number": 4,
+      "verses": [
+        "Therefore, my brothers, beloved and longed for, my joy and crown, stand firm in the Lord in this way, my beloved.",
+        "I exhort Euodia, and I exhort Syntyche, to think the same way in the Lord.",
+        "Yes, I beg you also, true partner, help these women, for they labored with me in the Good News with Clement also, and the rest of my fellow workers, whose names are in the book of life.",
+        "Rejoice in the Lord always! Again I will say, \"Rejoice!\"",
+        "Let your gentleness be known to all men. The Lord is at hand.",
+        "In nothing be anxious, but in everything, by prayer and petition with thanksgiving, let your requests be made known to God.",
+        "And the peace of God, which surpasses all understanding, will guard your hearts and your thoughts in Christ Jesus.",
+        "Finally, brothers, whatever things are true, whatever things are honorable, whatever things are just, whatever things are pure, whatever things are lovely, whatever things are of good report: if there is any virtue and if there is any praise, think about these things.",
+        "Do the things which you learned, received, heard, and saw in me, and the God of peace will be with you.",
+        "But I rejoice in the Lord greatly, that now at length you have revived your thought for me; in which you did indeed take thought, but you lacked opportunity.",
+        "Not that I speak because of lack, for I have learned in whatever state I am, to be content in it.",
+        "I know how to be humbled, and I know also how to abound. In everything and in all things I have learned the secret both to be filled and to be hungry, both to abound and to be in need.",
+        "I can do all things through Christ, who strengthens me.",
+        "However you did well that you shared in my affliction.",
+        "You yourselves also know, you Philippians, that in the beginning of the Good News, when I departed from Macedonia, no assembly shared with me in the matter of giving and receiving but you only.",
+        "For even in Thessalonica you sent once and again to my need.",
+        "Not that I seek for the gift, but I seek for the fruit that increases to your account.",
+        "But I have all things and abound. I am filled, having received from Epaphroditus the things that came from you, a sweet-smelling fragrance, an acceptable and well-pleasing sacrifice to God.",
+        "My God will supply every need of yours according to his riches in glory in Christ Jesus.",
+        "Now to our God and Father be the glory forever and ever! Amen.",
+        "Greet every saint in Christ Jesus. The brothers who are with me greet you.",
+        "All the saints greet you, especially those who are of Caesar's household.",
+        "The grace of the Lord Jesus Christ be with you all. Amen."
+      ]
+    }
+  ],
+  "featured": [
+    { "reference": "John 3:16", "label": "Verse of the day" },
+    { "reference": "Psalm 23:1", "label": "For anxious days" },
+    { "reference": "Philippians 4:6", "label": "When you're worried" },
+    { "reference": "1 Corinthians 13:4", "label": "On love" },
+    { "reference": "Genesis 1:1", "label": "Where it begins" },
+    { "reference": "Psalm 100:4", "label": "Gratitude" }
+  ]
+}

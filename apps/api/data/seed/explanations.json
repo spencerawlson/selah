@@ -1,0 +1,93 @@
+[
+  {
+    "_comment": "Hand-written explanations served by the offline mock AI provider. They exist so a fresh clone demos the real product loop without an API key. Written to the same brief as the prompt in app/services/ai/prompts.py: plain language, no invented history, no telling the reader what God wants them to decide.",
+    "reference": "John 3:16",
+    "tone": "plain",
+    "summary": "God's love for the world is what moved him to give his Son, so that anyone who trusts him can live.",
+    "meaning": "The verse names a motive and a result. The motive is love — not for a select few but for 'the world.' The result is that trusting Jesus opens the way to a life that does not end. 'Perish' and 'eternal life' are set against each other as two directions a life can take.",
+    "context": "Jesus is talking at night with Nicodemus, a respected religious teacher who came privately with questions. It follows the image of Moses lifting up a bronze serpent in the wilderness (v. 14): people looked, and lived. This verse explains why that lifting up happens at all.",
+    "application": "Read it once more replacing 'the world' with your own name. If believing here means trust rather than agreement, name one thing this week you would hand over to someone you trusted completely.",
+    "related_verses": [
+      { "reference": "Romans 5:8", "reason": "Love shown before we deserved it" },
+      { "reference": "1 John 4:9", "reason": "The same sending, from John's letter" },
+      { "reference": "John 3:17", "reason": "The next verse: rescue, not judgment" }
+    ]
+  },
+  {
+    "reference": "Psalm 23:1",
+    "tone": "plain",
+    "summary": "If God is the one shepherding me, I already have what I actually need.",
+    "meaning": "The line is a claim about provision, not about comfort. A shepherd's job is food, water, direction and defence — so 'I shall lack nothing' means the essentials are covered, not that nothing will ever go wrong. The rest of the psalm walks straight into a dark valley.",
+    "context": "A psalm attributed to David, who worked as a shepherd before he was a king, so the picture is drawn from a job he knew. Shepherd was also a common ancient title for a ruler, which makes this quietly bold: God, not the king, is the one doing the shepherding.",
+    "application": "Write down the one thing you are most afraid of running out of. Sit with the claim that provision is someone else's responsibility, not only yours, for the length of one prayer.",
+    "related_verses": [
+      { "reference": "John 10:11", "reason": "Jesus takes up the shepherd image" },
+      { "reference": "Psalms 23:4", "reason": "The same shepherd, in the dark valley" },
+      { "reference": "Isaiah 40:11", "reason": "God gathering the weak like lambs" }
+    ]
+  },
+  {
+    "reference": "Philippians 4:6",
+    "tone": "plain",
+    "summary": "Instead of carrying worry alone, hand each specific thing to God — and say thank you while you do.",
+    "meaning": "'In nothing be anxious' is paired with something to do instead, which is the point: the verse redirects worry rather than forbidding feeling. 'Requests' is plural and specific. 'With thanksgiving' is the surprising part — gratitude offered before the outcome is known.",
+    "context": "Paul writes to the church at Philippi from prison. He has just told two women in the congregation to work out a disagreement, and he is about to describe a peace that guards the heart (v. 7). This is practical instruction to a community under real pressure, not a slogan.",
+    "application": "Take the vague dread you are carrying and split it into three named requests. Say them out loud. Add one sentence of thanks that has nothing to do with the outcome you want.",
+    "related_verses": [
+      { "reference": "Philippians 4:7", "reason": "What follows: peace that guards you" },
+      { "reference": "1 Peter 5:7", "reason": "Casting anxiety on someone who cares" },
+      { "reference": "Matthew 6:34", "reason": "Jesus on tomorrow's worry" }
+    ]
+  },
+  {
+    "reference": "1 Corinthians 13:4",
+    "tone": "plain",
+    "summary": "Love is described by what it does and refuses to do, not by what it feels.",
+    "meaning": "Every word here is a verb or a behaviour. Patient means slow to anger with people. Kind means actively useful to them. Envy, bragging and pride are all named as love's opposites because each one puts the self at the centre — which is exactly what love does not do.",
+    "context": "The Corinthian church was gifted and competitive, arguing over whose spiritual abilities ranked highest. Paul interrupts that argument with this chapter. Chapter 12 lists the gifts; chapter 13 says they are worth nothing without the thing described here.",
+    "application": "Pick the one word in the list you are worst at this month. Choose a single person and practise just that word with them for a week.",
+    "related_verses": [
+      { "reference": "1 Corinthians 13:1", "reason": "Gifts without love are noise" },
+      { "reference": "Galatians 5:22", "reason": "Love heading the fruit of the Spirit" },
+      { "reference": "John 13:34", "reason": "The standard Jesus sets for it" }
+    ]
+  },
+  {
+    "reference": "Genesis 1:1",
+    "tone": "plain",
+    "summary": "Everything that exists has a beginning, and God is the one who started it.",
+    "meaning": "The sentence makes two claims at once: the universe is not eternal, and it is not an accident. 'The heavens and the earth' is a way of saying 'everything, top to bottom.' It says who and that, and it is not interested in how.",
+    "context": "The opening line of the Hebrew Bible. Its first readers were surrounded by creation stories in which the world was made from the corpses of warring gods. Against those, this account is strikingly calm: one God, no struggle, and a world called good.",
+    "application": "Go outside and look at one ordinary thing for a full minute — a tree, the sky, your own hand — on the assumption it was intended rather than accidental. Notice whether that changes anything.",
+    "related_verses": [
+      { "reference": "John 1:1", "reason": "Deliberately echoes this opening" },
+      { "reference": "Psalms 19:1", "reason": "Creation as testimony" },
+      { "reference": "Hebrews 11:3", "reason": "Creation understood by faith" }
+    ]
+  },
+  {
+    "reference": "Psalm 100:4",
+    "tone": "plain",
+    "summary": "The way in is gratitude — thanks at the gate, praise in the courtyard.",
+    "meaning": "The picture is physical: an ancient temple with gates, then courts, then the presence of God. Thanksgiving and praise are not the mood you need before you enter; they are the road you walk in on. 'Bless his name' means speak well of who he is.",
+    "context": "Psalm 100 is short and was likely sung by people literally walking into the temple. It is addressed to 'all you lands' — an invitation aimed well beyond Israel.",
+    "application": "Before your next request in prayer, name three specific things from the last 24 hours you are grateful for. Specific ones, not categories.",
+    "related_verses": [
+      { "reference": "Psalms 100:5", "reason": "The reason given: God is good" },
+      { "reference": "1 Thessalonians 5:18", "reason": "Thanks in every circumstance" },
+      { "reference": "Colossians 3:16", "reason": "Gratitude sung in community" }
+    ]
+  },
+  {
+    "reference": "John 3:16",
+    "tone": "kids",
+    "summary": "God loves everyone in the whole world so much that he sent his Son to give us life that never ends.",
+    "meaning": "God did not just say he loved people — he did something about it. He gave what was most precious to him. Anyone who trusts Jesus gets to be with God forever.",
+    "context": "Jesus said this at night to a man named Nicodemus, who was an important teacher. Nicodemus had a lot of questions and came when it was quiet so he could ask them.",
+    "application": "Think of one person who is hard to be kind to. Do one kind thing for them today, because that is what love that acts first looks like.",
+    "related_verses": [
+      { "reference": "1 John 4:9", "reason": "Another verse about God's big love" },
+      { "reference": "John 3:17", "reason": "Jesus came to rescue, not to scold" }
+    ]
+  }
+]
