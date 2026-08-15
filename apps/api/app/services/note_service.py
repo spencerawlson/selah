@@ -91,9 +91,7 @@ async def update_note(
 
 
 async def delete_note(session: AsyncSession, user_id: str, note_id: str) -> None:
-    result = await session.execute(
-        delete(Note).where(Note.id == note_id, Note.user_id == user_id)
-    )
+    result = await session.execute(delete(Note).where(Note.id == note_id, Note.user_id == user_id))
     if result.rowcount == 0:
         raise NotFoundError("Note not found.")
 

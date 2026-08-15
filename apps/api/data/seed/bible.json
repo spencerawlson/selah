@@ -2,10 +2,11 @@
   "_readme": [
     "Sample Bible content for local development and demos.",
     "Text is the World English Bible (WEB), which is in the public domain.",
-    "This is a HAND-ENTERED SUBSET — six complete chapters, not a full Bible.",
-    "Before any public release, replace it with a verified WEB import: see",
-    "scripts/import_bible.py, which ingests a standard WEB JSON dump and",
-    "recomputes chapter_count/verse_count from the imported data."
+    "This is a HAND-ENTERED SUBSET - six complete chapters, not a full Bible.",
+    "Before any public release, replace it with a verified import:",
+    "  python scripts/import_bible.py path/to/web.json --code WEB",
+    "That script ingests a standard flat Bible JSON dump and recomputes",
+    "chapter_count/verse_count from the imported data."
   ],
   "translation": {
     "code": "WEB",

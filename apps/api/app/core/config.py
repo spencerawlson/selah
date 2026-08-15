@@ -10,7 +10,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -55,17 +55,18 @@ class Settings(BaseSettings):
     ai_embedding_dimensions: int = 1536
 
     # ---- CORS --------------------------------------------------------------
-    cors_origins: list[str] = Field(
-        default_factory=lambda: ["http://localhost:8081", "http://localhost:19006"]
+    # Held as a string, not a list. pydantic-settings JSON-decodes list-typed
+    # fields straight from the environment before any validator runs, so
+    # `CORS_ORIGINS=http://a,http://b` would raise a JSONDecodeError. Parsing it
+    # ourselves keeps the .env format human-friendly.
+    cors_origins: str = Field(
+        default="http://localhost:8081,http://localhost:19006",
+        description="Comma-separated list of allowed origins, or * for any.",
     )
 
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def _split_origins(cls, value: object) -> object:
-        """Allow `CORS_ORIGINS=a,b,c` in addition to a JSON array."""
-        if isinstance(value, str) and not value.strip().startswith("["):
-            return [origin.strip() for origin in value.split(",") if origin.strip()]
-        return value
+    @property
+    def cors_origin_list(self) -> list[str]:
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
     @property
     def is_postgres(self) -> bool:

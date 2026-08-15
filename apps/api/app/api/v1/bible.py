@@ -18,11 +18,16 @@ from app.services import bible_service
 
 router = APIRouter(tags=["bible"])
 
+# Module-level singletons: calling Query() inline in a signature evaluates it
+# once at import anyway, and defining it here keeps the signatures readable.
 _TranslationQuery = Query(
     default=bible_service.DEFAULT_TRANSLATION,
     max_length=16,
     description="Translation code, e.g. WEB.",
 )
+_TestamentQuery = Query(default=None, description="Filter to one testament.")
+_ReferenceQuery = Query(description="A human reference, e.g. 'John 3:16'.", examples=["John 3:16"])
+_SearchQuery = Query(min_length=2, max_length=200, description="Search term.")
 
 
 @router.get("/translations", response_model=list[TranslationRead], summary="List translations")
@@ -34,7 +39,7 @@ async def list_translations(session: SessionDep) -> list[TranslationRead]:
 @router.get("/books", response_model=list[BookRead], summary="List books")
 async def list_books(
     session: SessionDep,
-    testament: Testament | None = Query(default=None, description="Filter to one testament."),
+    testament: Testament | None = _TestamentQuery,
 ) -> list[BookRead]:
     rows = await bible_service.list_books(session, testament=testament)
     return [BookRead.model_validate(row) for row in rows]
@@ -89,7 +94,7 @@ async def get_verse(session: SessionDep, verse_id: int) -> VerseRead:
 @router.get("/verses", response_model=VerseRead, summary="Look up a verse by reference")
 async def get_verse_by_reference(
     session: SessionDep,
-    reference: str = Query(description="A human reference, e.g. 'John 3:16'.", examples=["John 3:16"]),
+    reference: str = _ReferenceQuery,
     translation: str = _TranslationQuery,
 ) -> VerseRead:
     verse = await bible_service.get_verse_by_reference(
@@ -102,7 +107,7 @@ async def get_verse_by_reference(
 async def search(
     session: SessionDep,
     page: PageParams,
-    q: str = Query(min_length=2, max_length=200, description="Search term."),
+    q: str = _SearchQuery,
     translation: str = _TranslationQuery,
 ) -> Page[VerseRead]:
     rows, total = await bible_service.search_verses(

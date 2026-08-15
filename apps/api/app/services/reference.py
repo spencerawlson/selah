@@ -25,7 +25,7 @@ class ParsedReference:
 
 
 def slugify(value: str) -> str:
-    """"1 Corinthians" -> "1-corinthians". Matches Book.slug in the seed data."""
+    """ "1 Corinthians" -> "1-corinthians". Matches Book.slug in the seed data."""
     text = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode()
     text = re.sub(r"[^\w\s-]", "", text).strip().lower()
     return re.sub(r"[\s_]+", "-", text)

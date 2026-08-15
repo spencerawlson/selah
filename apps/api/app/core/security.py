@@ -16,7 +16,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import secrets
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -58,7 +58,7 @@ def verify_password(password: str, encoded: str | None) -> bool:
 # Tokens
 # --------------------------------------------------------------------------
 def create_access_token(user_id: str, *, extra_claims: dict[str, Any] | None = None) -> str:
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload: dict[str, Any] = {
         "sub": user_id,
         "iat": now,

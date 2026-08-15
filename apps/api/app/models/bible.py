@@ -14,7 +14,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base, TimestampMixin
 
 
-class Testament(str, enum.Enum):
+class Testament(enum.StrEnum):
     OLD = "old"
     NEW = "new"
 

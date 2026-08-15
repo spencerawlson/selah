@@ -67,9 +67,7 @@ async def update_note(
     return NoteRead.model_validate(note)
 
 
-@router.delete(
-    "/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a note"
-)
+@router.delete("/notes/{note_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete a note")
 async def delete_note(session: SessionDep, user: CurrentUser, note_id: str) -> None:
     await note_service.delete_note(session, user.id, note_id)
 

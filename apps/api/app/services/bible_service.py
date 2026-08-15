@@ -34,9 +34,7 @@ async def get_translation(session: AsyncSession, code: str) -> Translation:
 # --------------------------------------------------------------------------
 # Books
 # --------------------------------------------------------------------------
-async def list_books(
-    session: AsyncSession, *, testament: Testament | None = None
-) -> list[Book]:
+async def list_books(session: AsyncSession, *, testament: Testament | None = None) -> list[Book]:
     query = select(Book).order_by(Book.position)
     if testament is not None:
         query = query.where(Book.testament == testament)
@@ -50,8 +48,10 @@ async def get_book(session: AsyncSession, book_id: str) -> Book:
     back ids; accepting both here keeps that from leaking into every caller.
     """
     query = select(Book)
-    query = query.where(Book.id == int(book_id)) if book_id.isdigit() else query.where(
-        Book.slug == slugify(book_id)
+    query = (
+        query.where(Book.id == int(book_id))
+        if book_id.isdigit()
+        else query.where(Book.slug == slugify(book_id))
     )
     book = await session.scalar(query)
     if book is None:

@@ -147,10 +147,12 @@ async def test_wrong_password_is_rejected(client: AsyncClient) -> None:
 
 
 async def test_note_lifecycle(auth_client: AsyncClient) -> None:
-    verse = (await auth_client.get("/api/v1/verses", params={"reference": "Philippians 4:6"})).json()
+    response = await auth_client.get("/api/v1/verses", params={"reference": "Philippians 4:6"})
+    verse = response.json()
 
     created = await auth_client.post(
-        "/api/v1/notes", json={"body": "Split the worry into three requests.", "verse_id": verse["id"]}
+        "/api/v1/notes",
+        json={"body": "Split the worry into three requests.", "verse_id": verse["id"]},
     )
     assert created.status_code == 201
     note = created.json()

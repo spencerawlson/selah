@@ -26,6 +26,7 @@ __all__ = [
 # The vector table only exists on Postgres (pgvector). Registering it on SQLite
 # would break create_all, so it is opt-in by dialect rather than by flag.
 if settings.is_postgres:  # pragma: no cover - depends on deployment target
-    from app.models.embedding import VerseEmbedding
+    # Redundant alias: the import exists for its registration side effect.
+    from app.models.embedding import VerseEmbedding as VerseEmbedding
 
     __all__.append("VerseEmbedding")

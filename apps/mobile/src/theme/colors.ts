@@ -6,34 +6,61 @@
  * Scripture is always the highest-contrast thing on screen — chrome recedes.
  */
 
-export const palette = {
+export type ColorScheme = 'light' | 'dark';
+
+/** Every colour the app is allowed to use. Adding one means adding it here. */
+export interface Colors {
+  /** Page background — warm off-white, easier on the eyes than pure white. */
+  background: string;
+  /** Cards and sheets that sit above the page. */
+  surface: string;
+  /** Quiet fills: inputs, chips, skeletons. */
+  surfaceMuted: string;
+  border: string;
+
+  /** Scripture and headings. */
+  text: string;
+  /** Supporting copy. */
+  textMuted: string;
+  /** Verse numbers, timestamps, captions. */
+  textSubtle: string;
+  /** Text on an accent-filled surface. */
+  textOnAccent: string;
+
+  accent: string;
+  accentPressed: string;
+  accentMuted: string;
+
+  /** Premium and saved-verse marks. */
+  gold: string;
+  goldMuted: string;
+
+  /** Selected verse in the reader. */
+  highlight: string;
+
+  danger: string;
+  dangerMuted: string;
+}
+
+export const palette: Record<ColorScheme, Colors> = {
   light: {
-    /** Page background — warm off-white, easier on the eyes than pure white. */
     background: '#FBF7F1',
-    /** Cards and sheets that sit above the page. */
     surface: '#FFFFFF',
-    /** Quiet fills: inputs, chips, skeletons. */
     surfaceMuted: '#F2ECE3',
     border: '#E7DED1',
 
-    /** Scripture and headings. */
     text: '#1B1917',
-    /** Supporting copy. */
     textMuted: '#6C645A',
-    /** Verse numbers, timestamps, captions. */
     textSubtle: '#9C9387',
-    /** Text on an accent-filled surface. */
     textOnAccent: '#FFFFFF',
 
     accent: '#A85B32',
     accentPressed: '#8E4B27',
     accentMuted: '#F6E7DD',
 
-    /** Premium and saved-verse marks. */
     gold: '#A9803A',
     goldMuted: '#F6EEDD',
 
-    /** Selected verse in the reader. */
     highlight: '#FAEFD8',
 
     danger: '#B3261E',
@@ -63,7 +90,4 @@ export const palette = {
     danger: '#F2B8B5',
     dangerMuted: '#3B1E1C',
   },
-} as const;
-
-export type ColorScheme = keyof typeof palette;
-export type Colors = (typeof palette)['light'];
+};

@@ -1,0 +1,66 @@
+# Local development stack.
+#
+#   docker compose up -d db      # just Postgres — run the API on the host with reload
+#   docker compose up            # Postgres + the API in a container
+#
+# The API service is optional. Day to day it is faster to run uvicorn on the
+# host (instant reload, real debugger) and use Compose only for the database.
+
+name: selah
+
+services:
+  db:
+    # pgvector's image is stock Postgres with the extension already built, so
+    # `CREATE EXTENSION vector` just works. Same major version as production.
+    image: pgvector/pgvector:pg16
+    container_name: selah-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-selah}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-selah}
+      POSTGRES_DB: ${POSTGRES_DB:-selah}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      # Runs once, on an empty data directory only.
+      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-selah} -d ${POSTGRES_DB:-selah}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./apps/api
+    container_name: selah-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # `db` is the service name — inside the Compose network that is the host.
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-selah}:${POSTGRES_PASSWORD:-selah}@db:5432/${POSTGRES_DB:-selah}
+      ENVIRONMENT: ${ENVIRONMENT:-local}
+      DEBUG: ${DEBUG:-true}
+      JWT_SECRET: ${JWT_SECRET:-dev-only-insecure-secret-replace-before-deploying}
+      AI_PROVIDER: ${AI_PROVIDER:-mock}
+      AI_API_KEY: ${AI_API_KEY:-}
+      AI_MODEL: ${AI_MODEL:-gpt-4o-mini}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:8081,http://localhost:19006}
+    ports:
+      - '${API_PORT:-8000}:8000'
+    volumes:
+      # Live reload against the host source while developing in a container.
+      - ./apps/api/app:/app/app:ro
+      - ./apps/api/data:/app/data:ro
+    healthcheck:
+      test: ['CMD', 'python', '-c', "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  db-data:

@@ -40,7 +40,8 @@ TONE_GUIDANCE = {
 def build_explanation_prompt(verse: VerseContext, tone: str = "plain") -> str:
     guidance = TONE_GUIDANCE.get(tone, TONE_GUIDANCE["plain"])
     surrounding = (
-        f"\nSurrounding passage (for context only — do not explain these):\n{verse.surrounding_text}"
+        "\nSurrounding passage (for context only — do not explain these):\n"
+        f"{verse.surrounding_text}"
         if verse.surrounding_text
         else ""
     )
