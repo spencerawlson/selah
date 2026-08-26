@@ -19,6 +19,7 @@ import { ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Button, Card, Pill, Row, Text } from '@/components/ui';
 import { ExplanationView } from '@/components/verse';
 import { useAuth } from '@/state/auth';
+import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 const TONES: { value: Tone; label: string }[] = [
@@ -32,6 +33,7 @@ export default function VerseScreen() {
   const t = useTheme();
   const router = useRouter();
   const { isSignedIn } = useAuth();
+  const { locale } = useLocale();
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const verseId = Number(id);
@@ -49,7 +51,7 @@ export default function VerseScreen() {
       setFailure(null);
       try {
         setExplanation(
-          await api.explainVerse({ verse_id: verseId, tone: nextTone, refresh }),
+          await api.explainVerse({ verse_id: verseId, tone: nextTone, refresh, language: locale }),
         );
       } catch (caught) {
         setFailure(
@@ -61,7 +63,7 @@ export default function VerseScreen() {
         setGenerating(false);
       }
     },
-    [verseId],
+    [verseId, locale],
   );
 
   useEffect(() => {

@@ -70,6 +70,7 @@ async def explain_verse(
     reference: str | None = None,
     translation_code: str = bible_service.DEFAULT_TRANSLATION,
     tone: str = "plain",
+    language: str = "en",
     refresh: bool = False,
     provider: ExplanationProvider | None = None,
 ) -> tuple[Explanation, Verse, bool]:
@@ -78,15 +79,19 @@ async def explain_verse(
     verse = await _resolve_verse(
         session, verse_id=verse_id, reference=reference, translation_code=translation_code
     )
+    # Cache per language by tagging the model key, so English and French never collide.
+    cache_model = provider.model if language == "en" else f"{provider.model} ({language})"
 
     if not refresh:
-        cached = await _find_cached(session, verse.id, tone, provider.model)
+        cached = await _find_cached(session, verse.id, tone, cache_model)
         if cached is not None:
             return cached, verse, True
 
-    generated = await provider.explain(await _build_context(session, verse), tone=tone)
+    generated = await provider.explain(
+        await _build_context(session, verse), tone=tone, language=language
+    )
 
-    existing = await _find_cached(session, verse.id, tone, provider.model)
+    existing = await _find_cached(session, verse.id, tone, cache_model)
     if existing is not None:
         # The `refresh=True` path. Overwrite in place so the id stays stable.
         existing.summary = generated.summary
@@ -100,7 +105,7 @@ async def explain_verse(
     explanation = Explanation(
         verse_id=verse.id,
         tone=tone,
-        model=provider.model,
+        model=cache_model,
         summary=generated.summary,
         meaning=generated.meaning,
         context=generated.context,
@@ -113,7 +118,7 @@ async def explain_verse(
             session.add(explanation)
     except IntegrityError:
         logger.info("Explanation race on verse %s — serving the winning row.", verse.id)
-        winner = await _find_cached(session, verse.id, tone, provider.model)
+        winner = await _find_cached(session, verse.id, tone, cache_model)
         if winner is None:  # pragma: no cover - the unique constraint says this cannot happen
             raise UpstreamError("Could not store the generated explanation.") from None
         return winner, verse, True

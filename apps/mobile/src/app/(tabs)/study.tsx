@@ -17,6 +17,7 @@ import { Screen } from '@/components/screen';
 import { ErrorState, GeneratingState } from '@/components/states';
 import { Button, Card, Pill, Row, SectionHeader, Text } from '@/components/ui';
 import { ExplanationView, VerseCard } from '@/components/verse';
+import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 const TONES: { value: Tone; label: string }[] = [
@@ -34,6 +35,7 @@ function isReference(input: string): boolean {
 export default function StudyScreen() {
   const t = useTheme();
   const router = useRouter();
+  const { locale, t: tr } = useLocale();
 
   const [query, setQuery] = useState('');
   const [tone, setTone] = useState<Tone>('plain');
@@ -56,7 +58,7 @@ export default function StudyScreen() {
     setFailure(null);
     setExplanation(null);
     try {
-      setExplanation(await api.explainVerse({ reference, tone: nextTone }));
+      setExplanation(await api.explainVerse({ reference, tone: nextTone, language: locale }));
     } catch (caught) {
       setFailure(
         caught instanceof ApiError
@@ -87,13 +89,13 @@ export default function StudyScreen() {
   }
 
   return (
-    <Screen title="Study" subtitle="Ask about any verse.">
+    <Screen title={tr('nav.study')} subtitle={tr('study.subtitle')}>
       <Card style={{ gap: t.spacing.md, marginBottom: t.spacing.xl }}>
         <TextInput
           value={query}
           onChangeText={setQuery}
           onSubmitEditing={submit}
-          placeholder="John 3:16, or a phrase like “do not be anxious”"
+          placeholder={tr('study.placeholder')}
           placeholderTextColor={t.colors.textSubtle}
           returnKeyType="search"
           autoCapitalize="none"
@@ -114,7 +116,7 @@ export default function StudyScreen() {
           {TONES.map((option) => (
             <Pill
               key={option.value}
-              label={option.label}
+              label={tr(`tone.${option.value}`)}
               selected={tone === option.value}
               onPress={() => changeTone(option.value)}
             />
@@ -122,7 +124,7 @@ export default function StudyScreen() {
         </Row>
 
         <Button
-          title="Explain"
+          title={tr('study.explain')}
           icon="sparkles-outline"
           fullWidth
           loading={explaining}
@@ -150,12 +152,15 @@ export default function StudyScreen() {
 
       {search.data ? (
         <View style={{ gap: t.spacing.md }}>
-          <SectionHeader title={`${search.data.total} matches for “${submitted}”`} />
+          <SectionHeader
+            title={tr('study.results')
+              .replace('{n}', String(search.data.total))
+              .replace('{q}', submitted ?? '')}
+          />
           {search.data.items.length === 0 ? (
             <Card variant="muted">
               <Text variant="callout" tone="muted">
-                Nothing in the loaded chapters matches that. The sample data set covers Genesis 1,
-                Psalm 23 and 100, John 3, 1 Corinthians 13, and Philippians 4.
+                {tr('study.noMatch')}
               </Text>
             </Card>
           ) : null}

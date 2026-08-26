@@ -42,7 +42,11 @@ class MockProvider:
     name = "mock"
     model = "mock-1"
 
-    async def explain(self, verse: VerseContext, tone: str = "plain") -> GeneratedExplanation:
+    async def explain(
+        self, verse: VerseContext, tone: str = "plain", language: str = "en"
+    ) -> GeneratedExplanation:
+        # The offline mock is English-only; `language` is honoured by real providers.
+        _ = language
         curated = _curated().get(f"{verse.reference}|{tone}") or _curated().get(
             f"{verse.reference}|plain"
         )

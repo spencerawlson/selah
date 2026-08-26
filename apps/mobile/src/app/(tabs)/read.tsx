@@ -32,7 +32,7 @@ export default function ReadScreen() {
   const { width } = useWindowDimensions();
   const wide = width >= WIDE;
   const { mode, setMode } = useReader();
-  const { t: tr } = useLocale();
+  const { locale, t: tr } = useLocale();
   const immersion = mode === 'immersion';
 
   const [slug, setSlug] = useState('john');
@@ -71,14 +71,14 @@ export default function ReadScreen() {
       setExplaining(true);
       setExplanation(null);
       try {
-        setExplanation(await api.explainVerse({ verse_id: verse.id, tone: 'plain' }));
+        setExplanation(await api.explainVerse({ verse_id: verse.id, tone: 'plain', language: locale }));
       } catch {
         setExplanation(null);
       } finally {
         setExplaining(false);
       }
     },
-    [wide, router],
+    [wide, router, locale],
   );
 
   const title = chapter.data ? `${chapter.data.book_name} ${chapter.data.number}` : 'Reader';

@@ -40,6 +40,7 @@ async def create_verse_explanation(
         reference=payload.reference,
         translation_code=payload.translation_code,
         tone=payload.tone,
+        language=payload.language,
         refresh=payload.refresh,
     )
     # Build from the flat read model, then attach the verse we already loaded —

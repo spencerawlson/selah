@@ -18,12 +18,14 @@ import { Screen } from '@/components/screen';
 import { EmptyState, ErrorState, LoadingState, SignInPrompt } from '@/components/states';
 import { Button, Card, Row, Text } from '@/components/ui';
 import { useAuth } from '@/state/auth';
+import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 export default function NotesScreen() {
   const t = useTheme();
   const router = useRouter();
   const { isSignedIn, isRestoring } = useAuth();
+  const { t: tr } = useLocale();
 
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
@@ -75,7 +77,7 @@ export default function NotesScreen() {
 
   if (isRestoring) {
     return (
-      <Screen title="Notes">
+      <Screen title={tr('nav.notes')}>
         <LoadingState />
       </Screen>
     );
@@ -83,19 +85,16 @@ export default function NotesScreen() {
 
   if (!isSignedIn) {
     return (
-      <Screen title="Notes">
-        <SignInPrompt
-          message="Notes sync to your account so they survive a new phone. Sign in to start writing."
-          onPress={() => router.push('/sign-in')}
-        />
+      <Screen title={tr('nav.notes')}>
+        <SignInPrompt message={tr('notes.signin')} onPress={() => router.push('/sign-in')} />
       </Screen>
     );
   }
 
   return (
     <Screen
-      title="Notes"
-      subtitle="What you noticed, in your own words."
+      title={tr('nav.notes')}
+      subtitle={tr('notes.subtitle')}
       onRefresh={refresh}
       refreshing={isRefreshing}
     >
@@ -103,7 +102,7 @@ export default function NotesScreen() {
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder="What stood out to you?"
+          placeholder={tr('notes.placeholder')}
           placeholderTextColor={t.colors.textSubtle}
           multiline
           accessibilityLabel="New note"
@@ -118,7 +117,7 @@ export default function NotesScreen() {
           ]}
         />
         <Button
-          title="Save note"
+          title={tr('notes.save')}
           icon="checkmark"
           fullWidth
           loading={saving}
@@ -133,8 +132,8 @@ export default function NotesScreen() {
       {data && data.items.length === 0 ? (
         <EmptyState
           icon="create-outline"
-          title="Nothing written yet"
-          message="Read a verse, then come back and write one honest line about it."
+          title={tr('notes.emptyTitle')}
+          message={tr('notes.emptyMsg')}
         />
       ) : null}
 
@@ -166,7 +165,7 @@ export default function NotesScreen() {
                 hitSlop={8}
               >
                 <Text variant="caption" tone="danger">
-                  Delete
+                  {tr('notes.delete')}
                 </Text>
               </Pressable>
             </Row>

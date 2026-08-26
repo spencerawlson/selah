@@ -36,9 +36,17 @@ TONE_GUIDANCE = {
     "kids": "For a curious 9-year-old. Concrete images, no abstractions, gentle.",
 }
 
+LANGUAGE_NAMES = {
+    "en": "English",
+    "fr": "French",
+    "es": "Spanish",
+    "ht": "Haitian Creole",
+}
 
-def build_explanation_prompt(verse: VerseContext, tone: str = "plain") -> str:
+
+def build_explanation_prompt(verse: VerseContext, tone: str = "plain", language: str = "en") -> str:
     guidance = TONE_GUIDANCE.get(tone, TONE_GUIDANCE["plain"])
+    language_name = LANGUAGE_NAMES.get(language, "English")
     surrounding = (
         "\nSurrounding passage (for context only — do not explain these):\n"
         f"{verse.surrounding_text}"
@@ -53,6 +61,7 @@ Text: "{verse.text}"
 {surrounding}
 
 Tone: {guidance}
+Write every field of the JSON (summary, meaning, context, application, and each related_verses reason) in {language_name}. Keep Bible references in standard Book Chapter:Verse form.
 
 Produce JSON with these fields:
 - summary: one sentence (max 25 words) a reader could repeat from memory.

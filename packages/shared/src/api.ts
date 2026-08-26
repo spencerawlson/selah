@@ -97,6 +97,7 @@ export interface ExplanationRequest {
   reference?: string;
   translation_code?: string;
   tone?: Tone;
+  language?: string;
   refresh?: boolean;
 }
 

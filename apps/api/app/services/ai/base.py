@@ -62,7 +62,9 @@ class ExplanationProvider(Protocol):
     name: str
     model: str
 
-    async def explain(self, verse: VerseContext, tone: str = "plain") -> GeneratedExplanation: ...
+    async def explain(
+        self, verse: VerseContext, tone: str = "plain", language: str = "en"
+    ) -> GeneratedExplanation: ...
 
     async def summarize_chapter(
         self, book_name: str, chapter_number: int, verses: list[str]

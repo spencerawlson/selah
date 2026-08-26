@@ -58,9 +58,11 @@ class OpenAICompatibleProvider:
         self._api_key = api_key
         self._timeout = timeout or settings.ai_timeout_seconds
 
-    async def explain(self, verse: VerseContext, tone: str = "plain") -> GeneratedExplanation:
+    async def explain(
+        self, verse: VerseContext, tone: str = "plain", language: str = "en"
+    ) -> GeneratedExplanation:
         payload = await self._complete(
-            user_prompt=build_explanation_prompt(verse, tone),
+            user_prompt=build_explanation_prompt(verse, tone, language),
             schema=_json_schema(GeneratedExplanation, "verse_explanation"),
         )
         return GeneratedExplanation.model_validate(payload)
