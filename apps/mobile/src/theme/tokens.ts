@@ -48,9 +48,9 @@ export const typography = {
   display: { fontFamily: fonts.serif, fontSize: 30, lineHeight: 38, letterSpacing: -0.4 },
   title: { fontFamily: fonts.serif, fontSize: 22, lineHeight: 29, letterSpacing: -0.2 },
   /** Verse text in the reader. Generous line height — this gets read for minutes. */
-  scripture: { fontFamily: fonts.serif, fontSize: 19, lineHeight: 32 },
+  scripture: { fontFamily: fonts.serif, fontSize: 19, lineHeight: 34 },
   /** A single verse quoted on a card. */
-  quote: { fontFamily: fonts.serif, fontSize: 20, lineHeight: 31 },
+  quote: { fontFamily: fonts.serif, fontSize: 20, lineHeight: 32 },
 
   heading: { fontFamily: fonts.sans, fontSize: 17, lineHeight: 23, fontWeight: '600' as const },
   body: { fontFamily: fonts.sans, fontSize: 15, lineHeight: 23 },
@@ -70,12 +70,12 @@ export const typography = {
 export const shadow = {
   card: Platform.select({
     ios: {
-      shadowColor: '#3B2C1B',
-      shadowOpacity: 0.06,
+      shadowColor: '#1E2A30',
+      shadowOpacity: 0.07,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 4 },
     },
     android: { elevation: 2 },
-    default: { boxShadow: '0 4px 12px rgba(59, 44, 27, 0.06)' },
+    default: { boxShadow: '0 4px 12px rgba(30, 42, 48, 0.07)' },
   }) as object,
 } as const;

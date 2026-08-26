@@ -14,6 +14,8 @@ import { useMemo } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { AuthProvider } from '@/state/auth';
+import { LocaleProvider } from '@/state/locale';
+import { ReaderProvider } from '@/state/reader';
 import { useTheme } from '@/theme';
 
 export default function RootLayout() {
@@ -39,7 +41,9 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <ThemeProvider value={navigationTheme}>
+        <LocaleProvider>
+          <ReaderProvider>
+            <ThemeProvider value={navigationTheme}>
           <StatusBar style={t.scheme === 'dark' ? 'light' : 'dark'} />
           <Stack
             screenOptions={{
@@ -53,11 +57,17 @@ export default function RootLayout() {
             <Stack.Screen name="chapter/[id]" options={{ title: '' }} />
             <Stack.Screen name="verse/[id]" options={{ title: 'Explanation' }} />
             <Stack.Screen
+              name="share/[id]"
+              options={{ presentation: 'modal', title: 'Share' }}
+            />
+            <Stack.Screen
               name="sign-in"
               options={{ presentation: 'modal', title: 'Your account' }}
             />
           </Stack>
-        </ThemeProvider>
+            </ThemeProvider>
+          </ReaderProvider>
+        </LocaleProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

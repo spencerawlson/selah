@@ -4,7 +4,7 @@
  */
 
 import type { ReactNode } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Text } from '@/components/ui';
@@ -35,6 +35,9 @@ export function Screen({
 }: ScreenProps) {
   const t = useTheme();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  // On wide screens keep the reading column centered, like a page — not stretched.
+  const column = width >= 900 ? styles.column : undefined;
 
   const header = title ? (
     <View style={{ marginBottom: t.spacing.xl }}>
@@ -57,8 +60,10 @@ export function Screen({
   if (!scroll) {
     return (
       <View style={[styles.fill, { backgroundColor: t.colors.background }, padding]}>
-        {header}
-        {children}
+        <View style={column}>
+          {header}
+          {children}
+        </View>
       </View>
     );
   }
@@ -78,12 +83,15 @@ export function Screen({
         ) : undefined
       }
     >
-      {header}
-      {children}
+      <View style={column}>
+        {header}
+        {children}
+      </View>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
+  column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
 });

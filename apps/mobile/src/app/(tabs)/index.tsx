@@ -1,91 +1,103 @@
 /**
  * Today — the landing screen.
  *
- * One verse, given room to breathe, then a short curated shelf. Deliberately
- * not a feed: the goal is that someone reads one thing well and leaves.
+ * One verse, given room to breathe, and a single way forward. Deliberately not a
+ * feed: someone reads one thing well and leaves. Everything else lives a tap away
+ * in the Reader.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
+import { FadeIn } from '@/components/motion';
 import { Screen } from '@/components/screen';
 import { ErrorState, LoadingState } from '@/components/states';
-import { Button, Card, SectionHeader, Text } from '@/components/ui';
-import { VerseCard } from '@/components/verse';
+import { Button, Text } from '@/components/ui';
+import { VerseHero } from '@/components/verse';
 import { useAuth } from '@/state/auth';
+import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
-function greeting(date = new Date()): string {
+function greetingKey(date = new Date()): string {
   const hour = date.getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 18) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return 'today.morning';
+  if (hour < 18) return 'today.afternoon';
+  return 'today.evening';
+}
+
+/** Format the API's YYYY-MM-DD without tripping over UTC parsing. */
+function formatDate(iso?: string): string | undefined {
+  if (!iso) return undefined;
+  const [y, m, d] = iso.split('-').map(Number);
+  if (!y || !m || !d) return undefined;
+  return new Date(y, m - 1, d).toLocaleDateString(undefined, { month: 'long', day: 'numeric' });
 }
 
 export default function TodayScreen() {
   const t = useTheme();
   const router = useRouter();
   const { user } = useAuth();
+  const { t: tr } = useLocale();
   const { data, error, isLoading, isRefreshing, refresh } = useAsync(
     (signal) => api.getToday(signal),
     [],
   );
 
   const name = user?.display_name.split(' ')[0];
+  const votd = data?.verse_of_the_day;
 
   return (
     <Screen
-      title={name ? `${greeting()}, ${name}` : greeting()}
-      subtitle="Take a moment with one verse."
+      title={name ? `${tr(greetingKey())}, ${name}` : tr(greetingKey())}
+      subtitle={tr('today.subtitle')}
       onRefresh={refresh}
       refreshing={isRefreshing}
     >
-      {isLoading ? <LoadingState label="Finding today's verse…" /> : null}
+      {isLoading ? <LoadingState label={tr('today.finding')} /> : null}
       {error ? <ErrorState error={error} onRetry={refresh} /> : null}
 
-      {data?.verse_of_the_day ? (
-        <View style={{ gap: t.spacing.md, marginBottom: t.spacing.xxl }}>
-          <VerseCard
-            verse={data.verse_of_the_day.verse}
-            label={data.verse_of_the_day.label}
-            onPress={() => router.push(`/verse/${data.verse_of_the_day!.verse.id}`)}
+      {votd ? (
+        <FadeIn style={{ gap: t.spacing.lg }}>
+          <VerseHero
+            verse={votd.verse}
+            label={votd.label}
+            date={formatDate(data?.date)}
+            onPress={() => router.push(`/verse/${votd.verse.id}`)}
           />
           <Button
-            title="Explain this verse"
+            title={tr('today.reflect')}
             icon="sparkles-outline"
             fullWidth
-            onPress={() => router.push(`/verse/${data.verse_of_the_day!.verse.id}`)}
+            onPress={() => router.push(`/verse/${votd.verse.id}`)}
           />
-        </View>
-      ) : null}
-
-      {data && data.featured.length > 1 ? (
-        <View style={{ gap: t.spacing.md }}>
-          <SectionHeader title="Where to start" />
-          {data.featured
-            .filter((item) => item.verse.id !== data.verse_of_the_day?.verse.id)
-            .map((item) => (
-              <VerseCard
-                key={item.verse.id}
-                verse={item.verse}
-                label={item.label}
-                onPress={() => router.push(`/verse/${item.verse.id}`)}
-              />
-            ))}
-        </View>
+          <Pressable
+            onPress={() => router.navigate('/read')}
+            style={({ pressed }) => [styles.link, { opacity: pressed ? 0.6 : 1 }]}
+          >
+            <Text variant="callout" tone="muted">
+              {tr('today.openReader')}
+            </Text>
+            <Ionicons name="arrow-forward" size={15} color={t.colors.textMuted} />
+          </Pressable>
+        </FadeIn>
       ) : null}
 
       {data && !user ? (
-        <Card variant="muted" style={{ gap: t.spacing.md, marginTop: t.spacing.xxl }}>
-          <Text variant="heading">Save what you find</Text>
-          <Text variant="callout" tone="muted">
-            Reading never needs an account. Keeping notes and favorites does.
+        <Text variant="caption" tone="subtle" center style={{ marginTop: t.spacing.xxxl }}>
+          {tr('today.signinPre')}
+          <Text variant="caption" tone="accent" onPress={() => router.push('/sign-in')}>
+            {tr('today.signinLink')}
           </Text>
-          <Button title="Create an account" variant="secondary" onPress={() => router.push('/sign-in')} />
-        </Card>
+          {tr('today.signinPost')}
+        </Text>
       ) : null}
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  link: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 6 },
+});

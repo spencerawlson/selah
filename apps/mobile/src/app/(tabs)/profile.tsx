@@ -10,15 +10,17 @@ import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
 import { Screen } from '@/components/screen';
 import { EmptyState, ErrorState, LoadingState } from '@/components/states';
-import { Badge, Button, Card, Divider, Row, SectionHeader, Text } from '@/components/ui';
+import { Badge, Button, Card, Divider, Pill, Row, SectionHeader, Text } from '@/components/ui';
 import { VerseCard } from '@/components/verse';
 import { useAuth } from '@/state/auth';
+import { LOCALES, useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 export default function ProfileScreen() {
   const t = useTheme();
   const router = useRouter();
   const { user, isSignedIn, isRestoring, signOut } = useAuth();
+  const { locale, setLocale, t: tr } = useLocale();
 
   const favorites = useAsync(
     async (signal) => (isSignedIn ? api.getFavorites(signal) : null),
@@ -35,7 +37,7 @@ export default function ProfileScreen() {
 
   return (
     <Screen
-      title="You"
+      title={tr('nav.you')}
       onRefresh={isSignedIn ? favorites.refresh : undefined}
       refreshing={favorites.isRefreshing}
     >
@@ -72,6 +74,21 @@ export default function ProfileScreen() {
           <Button title="Sign in or create an account" onPress={() => router.push('/sign-in')} />
         </Card>
       )}
+
+      {/* ---- Language ---- */}
+      <View style={{ gap: t.spacing.md, marginTop: t.spacing.xl }}>
+        <SectionHeader title={tr('settings.language')} />
+        <Row gap={8} style={{ flexWrap: 'wrap' }}>
+          {LOCALES.map((l) => (
+            <Pill
+              key={l.value}
+              label={l.label}
+              selected={locale === l.value}
+              onPress={() => setLocale(l.value)}
+            />
+          ))}
+        </Row>
+      </View>
 
       {/* ---- Premium ---- */}
       {!user?.is_premium ? (

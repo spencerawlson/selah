@@ -5,10 +5,11 @@
  * verse first so the text is on screen while the explanation generates.
  */
 
+import { Ionicons } from '@expo/vector-icons';
 import type { ExplanationWithVerse, Tone } from '@selah/shared';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import * as api from '@/api/endpoints';
@@ -86,7 +87,22 @@ export default function VerseScreen() {
 
   return (
     <>
-      <Stack.Screen options={{ title: verse.data?.reference ?? 'Explanation' }} />
+      <Stack.Screen
+        options={{
+          title: verse.data?.reference ?? 'Explanation',
+          headerRight: () => (
+            <Pressable
+              onPress={() => router.push(`/share/${verseId}`)}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Share this verse"
+              style={({ pressed }) => ({ opacity: pressed ? 0.6 : 1 })}
+            >
+              <Ionicons name="share-outline" size={22} color={t.colors.accent} />
+            </Pressable>
+          ),
+        }}
+      />
 
       <Screen edges={{ top: false }}>
         {verse.isLoading ? <LoadingState /> : null}

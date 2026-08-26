@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
+import { Breathe } from '@/components/motion';
 import { Button, Card, Text } from '@/components/ui';
 import { useTheme } from '@/theme';
 
@@ -25,19 +26,26 @@ export function LoadingState({ label = 'Loading…' }: { label?: string }) {
   );
 }
 
-/** Shown while an explanation is generating — slower, so it says why. */
+/** Shown while an explanation is generating — a held breath, not a spinner. */
 export function GeneratingState() {
   const t = useTheme();
   return (
-    <Card variant="muted" style={{ gap: t.spacing.md }}>
-      <View style={[styles.row, { gap: t.spacing.sm }]}>
-        <ActivityIndicator color={t.colors.accent} size="small" />
-        <Text variant="heading">Reading it closely…</Text>
+    <Card
+      variant="muted"
+      style={{ gap: t.spacing.lg, alignItems: 'center', paddingVertical: t.spacing.xl }}
+    >
+      <Breathe>
+        <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: t.colors.accent }} />
+      </Breathe>
+      <View style={{ gap: t.spacing.xs, alignItems: 'center' }}>
+        <Text variant="heading" center>
+          Sitting with the verse…
+        </Text>
+        <Text variant="callout" tone="muted" center style={styles.prose}>
+          Reading it in context, and how it connects. A few seconds the first time — after that it is
+          instant.
+        </Text>
       </View>
-      <Text variant="callout" tone="muted">
-        Working through the verse, its context, and how it connects. This takes a few seconds the
-        first time; after that it is instant.
-      </Text>
     </Card>
   );
 }

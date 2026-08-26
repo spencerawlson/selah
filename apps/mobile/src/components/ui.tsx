@@ -221,6 +221,59 @@ export function Pill({ label, selected, onPress, icon }: PillProps) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Segmented — the Immersion / Study style switch
+// ---------------------------------------------------------------------------
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  const t = useTheme();
+  return (
+    <View
+      style={[
+        styles.segmented,
+        {
+          backgroundColor: t.colors.surfaceMuted,
+          borderColor: t.colors.border,
+          borderRadius: t.radius.pill,
+        },
+      ]}
+    >
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <Pressable
+            key={option.value}
+            onPress={() => onChange(option.value)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            style={[
+              styles.segment,
+              { borderRadius: t.radius.pill },
+              active ? [{ backgroundColor: t.colors.surface }, t.shadow.card] : null,
+            ]}
+          >
+            <RNText
+              style={[
+                t.typography.overline as TextStyle,
+                { color: active ? t.colors.text : t.colors.textSubtle },
+              ]}
+            >
+              {option.label.toUpperCase()}
+            </RNText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 /** A tiny badge — "Premium", "Cached", "WEB". */
 export function Badge({ label, tone = 'muted' }: { label: string; tone?: 'muted' | 'gold' }) {
   const t = useTheme();
@@ -265,5 +318,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderWidth: StyleSheet.hairlineWidth,
   },
+  segmented: { flexDirection: 'row', alignSelf: 'center', padding: 3, borderWidth: StyleSheet.hairlineWidth },
+  segment: { paddingHorizontal: 20, paddingVertical: 7 },
   badge: { paddingHorizontal: 7, paddingVertical: 3 },
 });

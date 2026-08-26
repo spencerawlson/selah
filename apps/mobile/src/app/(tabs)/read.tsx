@@ -1,174 +1,229 @@
 /**
- * Read — the book/chapter picker.
+ * Reader — the study workspace.
  *
- * Books grouped by testament, each expanding to a grid of chapter numbers.
- * Only seeded chapters appear, so the app never offers a page it cannot open.
+ * The passage on the left (Immersion / Study toggle, gold verse numbers) and,
+ * on a wide screen, the Context Inspector on the right: tap a verse and its
+ * meaning, context, application and cross-references appear beside it, generated
+ * by the AI. On a phone the inspector isn't shown side-by-side — tapping a verse
+ * opens the full explanation screen instead.
  */
 
-import type { Book, Chapter } from '@selah/shared';
+import type { ExplanationWithVerse, Verse } from '@selah/shared';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
-import { Screen } from '@/components/screen';
-import { EmptyState, ErrorState, LoadingState } from '@/components/states';
-import { Card, Row, SectionHeader, Text } from '@/components/ui';
+import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
+import { Pill, Segmented, Text } from '@/components/ui';
+import { ExplanationView, VerseLine } from '@/components/verse';
+import { useLocale } from '@/state/locale';
+import { useReader } from '@/state/reader';
 import { useTheme } from '@/theme';
+
+const WIDE = 900;
 
 export default function ReadScreen() {
   const t = useTheme();
-  const { data: books, error, isLoading, isRefreshing, refresh } = useAsync(
-    (signal) => api.getBooks(signal),
-    [],
-  );
-  const [expanded, setExpanded] = useState<string | null>(null);
-
-  const oldTestament = books?.filter((b) => b.testament === 'old') ?? [];
-  const newTestament = books?.filter((b) => b.testament === 'new') ?? [];
-
-  return (
-    <Screen
-      title="Read"
-      subtitle="The World English Bible."
-      onRefresh={refresh}
-      refreshing={isRefreshing}
-    >
-      {isLoading ? <LoadingState /> : null}
-      {error ? <ErrorState error={error} onRetry={refresh} /> : null}
-
-      {books && books.length === 0 ? (
-        <EmptyState
-          icon="book-outline"
-          title="No books loaded"
-          message="Run `python -m app.db.seed` in apps/api to load the sample chapters."
-        />
-      ) : null}
-
-      {oldTestament.length > 0 ? (
-        <View style={{ gap: t.spacing.md, marginBottom: t.spacing.xxl }}>
-          <SectionHeader title="Old Testament" />
-          {oldTestament.map((book) => (
-            <BookRow
-              key={book.id}
-              book={book}
-              expanded={expanded === book.slug}
-              onToggle={() => setExpanded(expanded === book.slug ? null : book.slug)}
-            />
-          ))}
-        </View>
-      ) : null}
-
-      {newTestament.length > 0 ? (
-        <View style={{ gap: t.spacing.md }}>
-          <SectionHeader title="New Testament" />
-          {newTestament.map((book) => (
-            <BookRow
-              key={book.id}
-              book={book}
-              expanded={expanded === book.slug}
-              onToggle={() => setExpanded(expanded === book.slug ? null : book.slug)}
-            />
-          ))}
-        </View>
-      ) : null}
-    </Screen>
-  );
-}
-
-function BookRow({
-  book,
-  expanded,
-  onToggle,
-}: {
-  book: Book;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
-  const t = useTheme();
-
-  return (
-    <Card padded={false} style={styles.bookCard}>
-      <Pressable
-        onPress={onToggle}
-        accessibilityRole="button"
-        accessibilityState={{ expanded }}
-        style={({ pressed }) => [{ padding: t.spacing.lg, opacity: pressed ? 0.7 : 1 }]}
-      >
-        <Row style={styles.between}>
-          <View style={styles.bookText}>
-            <Text variant="title">{book.name}</Text>
-            {book.blurb ? (
-              <Text variant="caption" tone="muted" style={{ marginTop: 2 }}>
-                {book.blurb}
-              </Text>
-            ) : null}
-          </View>
-          <Text variant="caption" tone="subtle">
-            {book.chapter_count} {book.chapter_count === 1 ? 'ch' : 'chs'}
-          </Text>
-        </Row>
-      </Pressable>
-
-      {expanded ? <ChapterGrid book={book} /> : null}
-    </Card>
-  );
-}
-
-function ChapterGrid({ book }: { book: Book }) {
-  const t = useTheme();
   const router = useRouter();
-  const { data, error, isLoading } = useAsync((signal) => api.getChapters(book.slug, signal), [
-    book.slug,
-  ]);
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  const wide = width >= WIDE;
+  const { mode, setMode } = useReader();
+  const { t: tr } = useLocale();
+  const immersion = mode === 'immersion';
+
+  const [slug, setSlug] = useState('john');
+  const [chapterId, setChapterId] = useState<number | null>(null);
+  const [selected, setSelected] = useState<Verse | null>(null);
+  const [explanation, setExplanation] = useState<ExplanationWithVerse | null>(null);
+  const [explaining, setExplaining] = useState(false);
+
+  const books = useAsync((signal) => api.getBooks(signal), []);
+  const chapters = useAsync((signal) => api.getChapters(slug, signal), [slug]);
+
+  // Default to the first chapter of the chosen book whenever the list changes.
+  useEffect(() => {
+    if (chapters.data && chapters.data.length > 0) {
+      const stillValid = chapters.data.some((c) => c.id === chapterId);
+      if (!stillValid) setChapterId(chapters.data[0].id);
+    }
+  }, [chapters.data]);
+
+  const chapter = useAsync(
+    (signal) => (chapterId ? api.getChapter(chapterId, signal) : Promise.resolve(null)),
+    [chapterId],
+  );
+  const verses = useAsync(
+    (signal) => (chapterId ? api.getVerses(chapterId, signal) : Promise.resolve([] as Verse[])),
+    [chapterId],
+  );
+
+  const openVerse = useCallback(
+    async (verse: Verse) => {
+      if (!wide) {
+        router.push(`/verse/${verse.id}`);
+        return;
+      }
+      setSelected(verse);
+      setExplaining(true);
+      setExplanation(null);
+      try {
+        setExplanation(await api.explainVerse({ verse_id: verse.id, tone: 'plain' }));
+      } catch {
+        setExplanation(null);
+      } finally {
+        setExplaining(false);
+      }
+    },
+    [wide, router],
+  );
+
+  const title = chapter.data ? `${chapter.data.book_name} ${chapter.data.number}` : 'Reader';
 
   return (
-    <View
-      style={{
-        paddingHorizontal: t.spacing.lg,
-        paddingBottom: t.spacing.lg,
-        borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: t.colors.border,
-        paddingTop: t.spacing.lg,
-      }}
-    >
-      {isLoading ? <LoadingState label="Loading chapters…" /> : null}
-      {error ? <ErrorState error={error} /> : null}
+    <View style={[styles.root, { flexDirection: wide ? 'row' : 'column', backgroundColor: t.colors.background }]}>
+      <ScrollView
+        style={styles.fill}
+        contentContainerStyle={{
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 48,
+          paddingHorizontal: 20,
+        }}
+      >
+        <View style={styles.column}>
+          {/* Book switcher */}
+          {books.data ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillrow}>
+              {books.data.map((book) => (
+                <Pill
+                  key={book.id}
+                  label={book.name}
+                  selected={book.slug === slug}
+                  onPress={() => setSlug(book.slug)}
+                />
+              ))}
+            </ScrollView>
+          ) : null}
 
-      <View style={styles.grid}>
-        {data?.map((chapter: Chapter) => (
-          <Pressable
-            key={chapter.id}
-            onPress={() => router.push(`/chapter/${chapter.id}`)}
-            accessibilityRole="button"
-            accessibilityLabel={`${book.name} chapter ${chapter.number}`}
-            style={({ pressed }) => [
-              styles.chapterChip,
-              {
-                backgroundColor: pressed ? t.colors.accentMuted : t.colors.surfaceMuted,
-                borderRadius: t.radius.md,
-              },
-            ]}
-          >
-            <Text variant="heading">{chapter.number}</Text>
-          </Pressable>
-        ))}
-      </View>
+          {/* Chapter switcher */}
+          {chapters.data && chapters.data.length > 1 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillrow}>
+              {chapters.data.map((c) => (
+                <Pill
+                  key={c.id}
+                  label={String(c.number)}
+                  selected={c.id === chapterId}
+                  onPress={() => setChapterId(c.id)}
+                />
+              ))}
+            </ScrollView>
+          ) : null}
+
+          {chapter.isLoading || verses.isLoading ? <LoadingState /> : null}
+          {chapter.error ? <ErrorState error={chapter.error} onRetry={chapter.refresh} /> : null}
+
+          {chapter.data ? (
+            <View style={styles.head}>
+              <Text variant="display" center>
+                {title}
+              </Text>
+              <Segmented
+                options={[
+                  { value: 'immersion', label: tr('reader.immersion') },
+                  { value: 'study', label: tr('reader.study') },
+                ]}
+                value={mode}
+                onChange={setMode}
+              />
+            </View>
+          ) : null}
+
+          {chapter.data && verses.data && verses.data.length > 0 ? (
+            <Text variant="overline" tone="subtle" style={styles.range}>
+              {chapter.data.book_name} {chapter.data.number}:1–{verses.data.length}
+            </Text>
+          ) : null}
+
+          {/* Verses */}
+          {immersion ? (
+            verses.data && verses.data.length > 0 ? (
+              <Text variant="scripture" style={styles.immersionText}>
+                {verses.data.map((verse) => (
+                  <Text key={verse.id}>
+                    <Text style={[styles.supNum, { color: t.colors.gold }]}>{verse.number} </Text>
+                    {verse.text}
+                    {'  '}
+                  </Text>
+                ))}
+              </Text>
+            ) : null
+          ) : (
+            <View style={{ gap: t.spacing.sm }}>
+              {verses.data?.map((verse) => (
+                <VerseLine
+                  key={verse.id}
+                  verse={verse}
+                  selected={selected?.id === verse.id}
+                  onPress={() => openVerse(verse)}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+      </ScrollView>
+
+      {/* Context Inspector (wide screens) */}
+      {wide ? (
+        <View
+          style={[
+            styles.inspector,
+            { backgroundColor: t.colors.surface, borderLeftColor: t.colors.border },
+          ]}
+        >
+          <View style={[styles.inspectorHead, { borderBottomColor: t.colors.border }]}>
+            <Text variant="heading">{tr('inspector.title')}</Text>
+          </View>
+          <ScrollView contentContainerStyle={{ padding: t.spacing.lg }}>
+            {explaining ? <GeneratingState /> : null}
+            {!explaining && explanation ? (
+              <ExplanationView
+                explanation={explanation}
+                onSelectRelated={async (reference) => {
+                  try {
+                    const target = await api.lookupVerse(reference);
+                    void openVerse(target);
+                  } catch {
+                    /* not in the sample set */
+                  }
+                }}
+              />
+            ) : null}
+            {!explaining && !explanation ? (
+              <EmptyState
+                icon="book-outline"
+                title={tr('inspector.emptyTitle')}
+                message={tr('inspector.emptyMsg')}
+              />
+            ) : null}
+          </ScrollView>
+        </View>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  bookCard: { overflow: 'hidden' },
-  between: { justifyContent: 'space-between', gap: 12 },
-  bookText: { flex: 1 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chapterChip: {
-    minWidth: 52,
-    height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 8,
-  },
+  root: { flex: 1 },
+  fill: { flex: 1 },
+  column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
+  pillrow: { gap: 8, paddingVertical: 6, paddingRight: 8 },
+  head: { alignItems: 'center', gap: 12, marginTop: 12, marginBottom: 16 },
+  range: { marginBottom: 12 },
+  immersionText: { lineHeight: 36 },
+  supNum: { fontSize: 12 },
+  inspector: { width: 340, borderLeftWidth: StyleSheet.hairlineWidth },
+  inspectorHead: { padding: 16, borderBottomWidth: StyleSheet.hairlineWidth },
 });

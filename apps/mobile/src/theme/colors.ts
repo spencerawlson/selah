@@ -1,8 +1,8 @@
 /**
  * Palette.
  *
- * The app is meant to feel like good paper, not like a dashboard: warm neutrals,
- * a single terracotta accent for actions, and muted gold reserved for premium.
+ * The app is meant to feel like good paper, not a dashboard: bright, soft paper
+ * with a calm blue accent for actions and muted gold reserved for premium.
  * Scripture is always the highest-contrast thing on screen — chrome recedes.
  */
 
@@ -44,50 +44,52 @@ export interface Colors {
 
 export const palette: Record<ColorScheme, Colors> = {
   light: {
-    background: '#FBF7F1',
+    background: '#F7F5F0',
     surface: '#FFFFFF',
-    surfaceMuted: '#F2ECE3',
-    border: '#E7DED1',
+    surfaceMuted: '#EDEFEA',
+    border: '#E2E3DD',
 
-    text: '#1B1917',
-    textMuted: '#6C645A',
-    textSubtle: '#9C9387',
+    text: '#232A2E',
+    textMuted: '#5F6B70',
+    textSubtle: '#96A1A6',
     textOnAccent: '#FFFFFF',
 
-    accent: '#A85B32',
-    accentPressed: '#8E4B27',
-    accentMuted: '#F6E7DD',
+    accent: '#4E86A6',
+    accentPressed: '#3E6E88',
+    accentMuted: '#E4EEF3',
 
-    gold: '#A9803A',
-    goldMuted: '#F6EEDD',
+    gold: '#B08D57',
+    goldMuted: '#F0E9DA',
 
-    highlight: '#FAEFD8',
+    highlight: '#E7F0F5',
 
     danger: '#B3261E',
-    dangerMuted: '#FBE9E7',
+    dangerMuted: '#F6E5E2',
   },
 
+  // OLED-optimized: true-black ground, near-black raised surfaces defined more by
+  // hairline borders than fill, soft cool-white text, and a calm blue accent.
   dark: {
-    background: '#121110',
-    surface: '#1B1917',
-    surfaceMuted: '#252120',
-    border: '#332E2A',
+    background: '#000000',
+    surface: '#0C0E10',
+    surfaceMuted: '#15181B',
+    border: '#262B2F',
 
-    text: '#F4EFE8',
-    textMuted: '#A9A093',
-    textSubtle: '#7D746A',
-    textOnAccent: '#1B1917',
+    text: '#E6EAEC',
+    textMuted: '#95A1A7',
+    textSubtle: '#66727A',
+    textOnAccent: '#0C0E10',
 
-    accent: '#E08B5C',
-    accentPressed: '#C97748',
-    accentMuted: '#3A2A20',
+    accent: '#6FA8C9',
+    accentPressed: '#5990B0',
+    accentMuted: '#12222B',
 
-    gold: '#D6B069',
-    goldMuted: '#332A18',
+    gold: '#CBA96A',
+    goldMuted: '#241F13',
 
-    highlight: '#3A2F1C',
+    highlight: '#12222B',
 
     danger: '#F2B8B5',
-    dangerMuted: '#3B1E1C',
+    dangerMuted: '#2A1513',
   },
 };
