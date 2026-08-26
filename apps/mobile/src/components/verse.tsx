@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   quoteMark: { position: 'absolute', top: -22, right: 8, fontSize: 96, lineHeight: 96, opacity: 0.1 },
   heroVerse: { marginTop: 16, fontSize: 25, lineHeight: 37, letterSpacing: -0.2 },
   heroFooter: { marginTop: 20 },
-  imageHero: { minHeight: 300, justifyContent: 'flex-end', borderRadius: 24, overflow: 'hidden' },
+  imageHero: { minHeight: 440, justifyContent: 'flex-end', borderRadius: 24, overflow: 'hidden' },
   imageContent: { padding: 24 },
   imageLabel: { color: 'rgba(255,255,255,0.92)' },
   imageVerse: {

@@ -20,6 +20,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { Glass } from '@/components/glass';
 import { selectFeedback, tapFeedback } from '@/components/haptics';
 import { useTheme } from '@/theme';
 
@@ -66,17 +67,21 @@ interface CardProps extends ViewProps {
 
 export function Card({ variant = 'raised', padded = true, style, ...rest }: CardProps) {
   const t = useTheme();
+  const base = {
+    borderRadius: t.radius.lg,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: t.colors.border,
+    padding: padded ? t.spacing.lg : 0,
+  };
+
+  // Raised cards are frosted glass; flat/muted stay solid (they fill lists).
+  if (variant === 'raised') {
+    return <Glass style={[base, t.shadow.card, style]} {...rest} />;
+  }
   return (
     <View
       style={[
-        {
-          backgroundColor: variant === 'muted' ? t.colors.surfaceMuted : t.colors.surface,
-          borderRadius: t.radius.lg,
-          borderWidth: StyleSheet.hairlineWidth,
-          borderColor: t.colors.border,
-          padding: padded ? t.spacing.lg : 0,
-        },
-        variant === 'raised' && t.shadow.card,
+        { backgroundColor: variant === 'muted' ? t.colors.surfaceMuted : t.colors.surface, ...base },
         style,
       ]}
       {...rest}

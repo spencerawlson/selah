@@ -44,24 +44,24 @@ export interface Colors {
 
 export const palette: Record<ColorScheme, Colors> = {
   light: {
-    background: '#FAF5EA',
-    surface: '#FFFDF6',
-    surfaceMuted: '#F1E9D6',
-    border: '#E7DEC9',
+    background: '#F4EAD0',
+    surface: '#FCF7E6',
+    surfaceMuted: '#ECE0C4',
+    border: '#E3D6B7',
 
-    text: '#221E17',
-    textMuted: '#756B58',
-    textSubtle: '#A79C84',
+    text: '#221E15',
+    textMuted: '#746A54',
+    textSubtle: '#A89B7E',
     textOnAccent: '#FFFFFF',
 
     accent: '#A48350',
-    accentPressed: '#8C6E3E',
-    accentMuted: '#F1E7CF',
+    accentPressed: '#8A6A38',
+    accentMuted: '#EFE3C7',
 
     gold: '#A48350',
-    goldMuted: '#F1E7CF',
+    goldMuted: '#EFE3C7',
 
-    highlight: '#F3E7CB',
+    highlight: '#F0E3BF',
 
     danger: '#B3261E',
     dangerMuted: '#F6E5E0',
