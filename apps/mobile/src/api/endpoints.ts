@@ -26,7 +26,8 @@ import { request } from './client';
 // ---------------------------------------------------------------------------
 // Home
 // ---------------------------------------------------------------------------
-export const getToday = (signal?: AbortSignal) => request<Today>('/today', { signal });
+export const getToday = (translation?: string, signal?: AbortSignal) =>
+  request<Today>('/today', { query: translation ? { translation } : undefined, signal });
 
 // ---------------------------------------------------------------------------
 // Bible

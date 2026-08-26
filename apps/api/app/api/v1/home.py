@@ -12,7 +12,7 @@ from datetime import date
 from functools import lru_cache
 from pathlib import Path
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 from app.api.deps import SessionDep
@@ -45,7 +45,10 @@ def _featured_entries() -> list[dict[str, str]]:
 
 
 @router.get("/today", response_model=TodayResponse, summary="Home screen content")
-async def today(session: SessionDep) -> TodayResponse:
+async def today(
+    session: SessionDep,
+    translation: str = Query(default=bible_service.DEFAULT_TRANSLATION, max_length=16),
+) -> TodayResponse:
     """Verse of the day plus the curated shelf.
 
     The daily verse rotates by ordinal date, so it is stable for everyone on a
@@ -56,7 +59,9 @@ async def today(session: SessionDep) -> TodayResponse:
 
     for entry in entries:
         try:
-            verse = await bible_service.get_verse_by_reference(session, entry["reference"])
+            verse = await bible_service.get_verse_by_reference(
+                session, entry["reference"], translation_code=translation
+            )
         except AppError:
             # A curated reference outside the seeded subset should dim the shelf,
             # not break the home screen.

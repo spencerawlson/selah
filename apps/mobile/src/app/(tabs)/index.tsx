@@ -18,7 +18,7 @@ import { ErrorState, LoadingState } from '@/components/states';
 import { Button, Text } from '@/components/ui';
 import { VerseHero } from '@/components/verse';
 import { useAuth } from '@/state/auth';
-import { useLocale } from '@/state/locale';
+import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 function greetingKey(date = new Date()): string {
@@ -40,10 +40,10 @@ export default function TodayScreen() {
   const t = useTheme();
   const router = useRouter();
   const { user } = useAuth();
-  const { t: tr } = useLocale();
+  const { locale, t: tr } = useLocale();
   const { data, error, isLoading, isRefreshing, refresh } = useAsync(
-    (signal) => api.getToday(signal),
-    [],
+    (signal) => api.getToday(TRANSLATION_FOR[locale], signal),
+    [locale],
   );
 
   const name = user?.display_name.split(' ')[0];

@@ -70,12 +70,12 @@ export const typography = {
 export const shadow = {
   card: Platform.select({
     ios: {
-      shadowColor: '#1E2A30',
-      shadowOpacity: 0.07,
+      shadowColor: '#2B2620',
+      shadowOpacity: 0.06,
       shadowRadius: 12,
       shadowOffset: { width: 0, height: 4 },
     },
     android: { elevation: 2 },
-    default: { boxShadow: '0 4px 12px rgba(30, 42, 48, 0.07)' },
+    default: { boxShadow: '0 4px 12px rgba(43, 38, 32, 0.06)' },
   }) as object,
 } as const;
