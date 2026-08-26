@@ -30,7 +30,7 @@ export default function ChapterScreen() {
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
   const { mode, setMode } = useReader();
-  const { locale } = useLocale();
+  const { locale, t: tr } = useLocale();
   const immersion = mode === 'immersion';
 
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -60,8 +60,8 @@ export default function ChapterScreen() {
       setSummary(updated.summary);
     } catch (caught) {
       Alert.alert(
-        'Could not summarise',
-        caught instanceof ApiError ? caught.message : 'Something went wrong.',
+        tr('chapter.couldNotSummarise'),
+        caught instanceof ApiError ? caught.message : tr('common.somethingWrong'),
       );
     } finally {
       setSummarizing(false);
@@ -75,11 +75,11 @@ export default function ChapterScreen() {
     }
     try {
       await api.addFavorite(verse.id);
-      Alert.alert('Saved', `${verse.reference} is in your saved verses.`);
+      Alert.alert(tr('verse.savedTitle'), tr('verse.savedBody').replace('{ref}', verse.reference));
     } catch (caught) {
       Alert.alert(
-        'Could not save',
-        caught instanceof ApiError ? caught.message : 'Something went wrong.',
+        tr('verse.couldNotSave'),
+        caught instanceof ApiError ? caught.message : tr('common.somethingWrong'),
       );
     }
   }
@@ -102,8 +102,8 @@ export default function ChapterScreen() {
             </Text>
             <Segmented
               options={[
-                { value: 'immersion', label: 'Immersion' },
-                { value: 'study', label: 'Study' },
+                { value: 'immersion', label: tr('reader.immersion') },
+                { value: 'study', label: tr('reader.study') },
               ]}
               value={mode}
               onChange={setMode}
@@ -114,7 +114,6 @@ export default function ChapterScreen() {
         {chapter.data && verses.data && verses.data.length > 0 ? (
           <Text variant="overline" tone="subtle" style={{ marginBottom: t.spacing.md }}>
             {chapter.data.book_name} {chapter.data.number}:1–{verses.data.length}
-            {!immersion ? '   ·   World English Bible' : ''}
           </Text>
         ) : null}
 
@@ -124,13 +123,13 @@ export default function ChapterScreen() {
             {shownSummary ? (
               <Card variant="muted" style={{ gap: t.spacing.sm, marginBottom: t.spacing.xl }}>
                 <Text variant="overline" tone="subtle">
-                  IN SHORT
+                  {tr('chapter.inShort').toUpperCase()}
                 </Text>
                 <Text variant="body">{shownSummary}</Text>
               </Card>
             ) : chapter.data ? (
               <Button
-                title="Summarise this chapter"
+                title={tr('chapter.summarise')}
                 variant="secondary"
                 icon="sparkles-outline"
                 loading={summarizing}
@@ -152,7 +151,7 @@ export default function ChapterScreen() {
 
             {verses.data && verses.data.length > 0 ? (
               <Text variant="caption" tone="subtle" center style={{ marginTop: t.spacing.xxl }}>
-                Tap a verse to explain or save it.
+                {tr('chapter.tapHint')}
               </Text>
             ) : null}
           </>
@@ -188,13 +187,13 @@ export default function ChapterScreen() {
           <Divider style={{ marginVertical: t.spacing.md }} />
           <Row gap={8}>
             <Button
-              title="Explain"
+              title={tr('chapter.explain')}
               icon="sparkles-outline"
               style={styles.action}
               onPress={() => router.push(`/verse/${selected.id}`)}
             />
             <Button
-              title="Save"
+              title={tr('chapter.save')}
               icon="bookmark-outline"
               variant="secondary"
               style={styles.action}

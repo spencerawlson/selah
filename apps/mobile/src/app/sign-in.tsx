@@ -13,6 +13,7 @@ import { ApiError } from '@/api/client';
 import { Screen } from '@/components/screen';
 import { Button, Card, Divider, Text } from '@/components/ui';
 import { useAuth } from '@/state/auth';
+import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 type Mode = 'sign-in' | 'sign-up';
@@ -21,6 +22,7 @@ export default function SignInScreen() {
   const t = useTheme();
   const router = useRouter();
   const { signIn, signUp } = useAuth();
+  const { t: tr } = useLocale();
 
   const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
@@ -41,7 +43,7 @@ export default function SignInScreen() {
       else await signIn(email, password);
       router.back();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Something went wrong.');
+      setError(caught instanceof ApiError ? caught.message : tr('common.somethingWrong'));
     } finally {
       setBusy(false);
     }
@@ -59,12 +61,8 @@ export default function SignInScreen() {
       style={styles.fill}
     >
       <Screen
-        title={isSignUp ? 'Create an account' : 'Welcome back'}
-        subtitle={
-          isSignUp
-            ? 'So your notes and saved verses follow you.'
-            : 'Sign in to reach your notes and saved verses.'
-        }
+        title={isSignUp ? tr('signin.createTitle') : tr('signin.welcomeTitle')}
+        subtitle={isSignUp ? tr('signin.createSubtitle') : tr('signin.welcomeSubtitle')}
         edges={{ top: false }}
       >
         <Card style={{ gap: t.spacing.md }}>
@@ -72,7 +70,7 @@ export default function SignInScreen() {
             <TextInput
               value={displayName}
               onChangeText={setDisplayName}
-              placeholder="Your name"
+              placeholder={tr('signin.name')}
               placeholderTextColor={t.colors.textSubtle}
               autoCapitalize="words"
               autoComplete="name"
@@ -84,7 +82,7 @@ export default function SignInScreen() {
           <TextInput
             value={email}
             onChangeText={setEmail}
-            placeholder="Email"
+            placeholder={tr('signin.email')}
             placeholderTextColor={t.colors.textSubtle}
             autoCapitalize="none"
             autoCorrect={false}
@@ -97,7 +95,7 @@ export default function SignInScreen() {
           <TextInput
             value={password}
             onChangeText={setPassword}
-            placeholder="Password (at least 8 characters)"
+            placeholder={tr('signin.password')}
             placeholderTextColor={t.colors.textSubtle}
             secureTextEntry
             autoCapitalize="none"
@@ -114,7 +112,7 @@ export default function SignInScreen() {
           ) : null}
 
           <Button
-            title={isSignUp ? 'Create account' : 'Sign in'}
+            title={isSignUp ? tr('signin.createBtn') : tr('signin.signInBtn')}
             fullWidth
             loading={busy}
             disabled={!canSubmit}
@@ -124,7 +122,7 @@ export default function SignInScreen() {
           <Divider />
 
           <Button
-            title={isSignUp ? 'I already have an account' : "I'm new here"}
+            title={isSignUp ? tr('signin.haveAccount') : tr('signin.newHere')}
             variant="ghost"
             onPress={() => {
               setMode(isSignUp ? 'sign-in' : 'sign-up');

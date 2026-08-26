@@ -55,23 +55,23 @@ export default function ProfileScreen() {
           </Row>
           <Divider />
           <Button
-            title="Sign out"
+            title={tr('profile.signout')}
             variant="ghost"
             onPress={() => {
-              Alert.alert('Sign out?', 'Your notes stay saved to your account.', [
-                { text: 'Cancel', style: 'cancel' },
-                { text: 'Sign out', style: 'destructive', onPress: () => void signOut() },
+              Alert.alert(tr('profile.signoutTitle'), tr('profile.signoutBody'), [
+                { text: tr('common.cancel'), style: 'cancel' },
+                { text: tr('profile.signout'), style: 'destructive', onPress: () => void signOut() },
               ]);
             }}
           />
         </Card>
       ) : (
         <Card style={{ gap: t.spacing.md }}>
-          <Text variant="title">Not signed in</Text>
+          <Text variant="title">{tr('profile.notSignedIn')}</Text>
           <Text variant="callout" tone="muted">
-            Reading works without an account. Notes and saved verses need one.
+            {tr('profile.notSignedInBody')}
           </Text>
-          <Button title="Sign in or create an account" onPress={() => router.push('/sign-in')} />
+          <Button title={tr('profile.signInCta')} onPress={() => router.push('/sign-in')} />
         </Card>
       )}
 
@@ -97,15 +97,15 @@ export default function ProfileScreen() {
           style={{ gap: t.spacing.sm, marginTop: t.spacing.xl, borderColor: t.colors.gold }}
         >
           <Text variant="overline" tone="gold">
-            SELAH PREMIUM
+            {tr('profile.premiumLabel').toUpperCase()}
           </Text>
-          <Text variant="heading">Unlimited explanations</Text>
+          <Text variant="heading">{tr('profile.premiumTitle')}</Text>
           <Text variant="callout" tone="muted">
-            Every tone, licensed modern translations, offline chapters, and no daily cap.
+            {tr('profile.premiumBody')}
           </Text>
           {/* TODO(billing): wire to RevenueCat or Stripe before launch. */}
           <Button
-            title="Coming soon"
+            title={tr('profile.comingSoon')}
             variant="secondary"
             disabled
             onPress={() => undefined}
@@ -117,7 +117,7 @@ export default function ProfileScreen() {
       {/* ---- Saved verses ---- */}
       {isSignedIn ? (
         <View style={{ gap: t.spacing.md, marginTop: t.spacing.xxl }}>
-          <SectionHeader title="Saved verses" />
+          <SectionHeader title={tr('profile.savedVerses')} />
           {favorites.isLoading ? <LoadingState /> : null}
           {favorites.error ? (
             <ErrorState error={favorites.error} onRetry={favorites.refresh} />
@@ -126,8 +126,8 @@ export default function ProfileScreen() {
           {favorites.data && favorites.data.items.length === 0 ? (
             <EmptyState
               icon="bookmark-outline"
-              title="Nothing saved yet"
-              message="Tap the bookmark on any verse while reading and it will show up here."
+              title={tr('profile.nothingSavedTitle')}
+              message={tr('profile.nothingSavedBody')}
             />
           ) : null}
 
@@ -145,16 +145,16 @@ export default function ProfileScreen() {
 
       {/* ---- Diagnostics ---- */}
       <View style={{ gap: t.spacing.sm, marginTop: t.spacing.xxl }}>
-        <SectionHeader title="About" />
+        <SectionHeader title={tr('profile.about')} />
         <Card variant="muted" style={{ gap: t.spacing.xs }}>
           <Text variant="caption" tone="muted">
-            Selah 0.1.0 · development build
+            Selah 0.1.0 · {tr('profile.devBuild')}
           </Text>
           <Text variant="caption" tone="subtle">
             API: {API_BASE_URL}
           </Text>
           <Text variant="caption" tone="subtle">
-            Scripture: World English Bible (public domain).
+            {tr('profile.scriptureNote')}
           </Text>
         </Card>
       </View>

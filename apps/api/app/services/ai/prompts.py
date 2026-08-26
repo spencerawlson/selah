@@ -40,7 +40,6 @@ LANGUAGE_NAMES = {
     "en": "English",
     "fr": "French",
     "es": "Spanish",
-    "ht": "Haitian Creole",
 }
 
 

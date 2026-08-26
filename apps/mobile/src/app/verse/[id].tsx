@@ -33,7 +33,7 @@ export default function VerseScreen() {
   const t = useTheme();
   const router = useRouter();
   const { isSignedIn } = useAuth();
-  const { locale } = useLocale();
+  const { locale, t: tr } = useLocale();
 
   const { id } = useLocalSearchParams<{ id: string }>();
   const verseId = Number(id);
@@ -57,7 +57,7 @@ export default function VerseScreen() {
         setFailure(
           caught instanceof ApiError
             ? caught
-            : new ApiError('internal_error', 'Could not explain that verse.', 0),
+            : new ApiError('internal_error', tr('verse.couldNotExplain'), 0),
         );
       } finally {
         setGenerating(false);
@@ -78,11 +78,14 @@ export default function VerseScreen() {
     }
     try {
       await api.addFavorite(verseId);
-      Alert.alert('Saved', `${verse.data?.reference ?? 'This verse'} is in your saved verses.`);
+      Alert.alert(
+        tr('verse.savedTitle'),
+        tr('verse.savedBody').replace('{ref}', verse.data?.reference ?? ''),
+      );
     } catch (caught) {
       Alert.alert(
-        'Could not save',
-        caught instanceof ApiError ? caught.message : 'Something went wrong.',
+        tr('verse.couldNotSave'),
+        caught instanceof ApiError ? caught.message : tr('common.somethingWrong'),
       );
     }
   }
@@ -91,7 +94,7 @@ export default function VerseScreen() {
     <>
       <Stack.Screen
         options={{
-          title: verse.data?.reference ?? 'Explanation',
+          title: verse.data?.reference ?? tr('verse.title'),
           headerRight: () => (
             <Pressable
               onPress={() => router.push(`/share/${verseId}`)}
@@ -124,7 +127,7 @@ export default function VerseScreen() {
           {TONES.map((option) => (
             <Pill
               key={option.value}
-              label={option.label}
+              label={tr(`tone.${option.value}`)}
               selected={tone === option.value}
               onPress={() => setTone(option.value)}
             />
@@ -144,8 +147,8 @@ export default function VerseScreen() {
                 router.push(`/verse/${target.id}`);
               } catch {
                 Alert.alert(
-                  'Not loaded yet',
-                  `${reference} is not in the sample data set. Import the full Bible to follow every link.`,
+                  tr('verse.notLoadedTitle'),
+                  tr('verse.notLoadedBody').replace('{ref}', reference),
                 );
               }
             }}
@@ -155,14 +158,14 @@ export default function VerseScreen() {
         {explanation && !generating ? (
           <Row gap={8} style={{ marginTop: t.spacing.xl }}>
             <Button
-              title="Save verse"
+              title={tr('verse.save')}
               icon="bookmark-outline"
               variant="secondary"
               style={styles.action}
               onPress={save}
             />
             <Button
-              title="Regenerate"
+              title={tr('verse.regenerate')}
               icon="refresh"
               variant="ghost"
               style={styles.action}

@@ -27,7 +27,7 @@ class ExplanationRequest(BaseModel):
     reference: str | None = Field(default=None, examples=["John 3:16"])
     translation_code: str = Field(default="WEB", max_length=16)
     tone: Tone = "plain"
-    language: Literal["en", "fr", "es", "ht"] = "en"
+    language: Literal["en", "fr", "es"] = "en"
     refresh: bool = Field(
         default=False, description="Bypass the cache and regenerate. Rate-limited in production."
     )

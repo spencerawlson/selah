@@ -63,7 +63,7 @@ export default function TodayScreen() {
         <FadeIn style={{ gap: t.spacing.lg }}>
           <VerseHero
             verse={votd.verse}
-            label={votd.label}
+            label={tr('today.votd')}
             date={formatDate(data?.date)}
             onPress={() => router.push(`/verse/${votd.verse.id}`)}
           />

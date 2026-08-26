@@ -12,15 +12,17 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { ApiError } from '@/api/client';
 import { Breathe } from '@/components/motion';
 import { Button, Card, Text } from '@/components/ui';
+import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
-export function LoadingState({ label = 'Loading…' }: { label?: string }) {
+export function LoadingState({ label }: { label?: string }) {
   const t = useTheme();
+  const { t: tr } = useLocale();
   return (
     <View style={[styles.center, { paddingVertical: t.spacing.xxxl, gap: t.spacing.md }]}>
       <ActivityIndicator color={t.colors.accent} />
       <Text variant="callout" tone="subtle">
-        {label}
+        {label ?? tr('state.loading')}
       </Text>
     </View>
   );
@@ -29,6 +31,7 @@ export function LoadingState({ label = 'Loading…' }: { label?: string }) {
 /** Shown while an explanation is generating — a held breath, not a spinner. */
 export function GeneratingState() {
   const t = useTheme();
+  const { t: tr } = useLocale();
   return (
     <Card
       variant="muted"
@@ -39,11 +42,10 @@ export function GeneratingState() {
       </Breathe>
       <View style={{ gap: t.spacing.xs, alignItems: 'center' }}>
         <Text variant="heading" center>
-          Sitting with the verse…
+          {tr('state.generatingTitle')}
         </Text>
         <Text variant="callout" tone="muted" center style={styles.prose}>
-          Reading it in context, and how it connects. A few seconds the first time — after that it is
-          instant.
+          {tr('state.generatingBody')}
         </Text>
       </View>
     </Card>
@@ -89,6 +91,7 @@ export function EmptyState({
 
 export function ErrorState({ error, onRetry }: { error: ApiError; onRetry?: () => void }) {
   const t = useTheme();
+  const { t: tr } = useLocale();
 
   // The offline case is common in development and has a specific fix, so it
   // gets specific words rather than the generic failure copy.
@@ -102,7 +105,7 @@ export function ErrorState({ error, onRetry }: { error: ApiError; onRetry?: () =
           size={20}
           color={t.colors.danger}
         />
-        <Text variant="heading">{isOffline ? "Can't reach the server" : 'Something broke'}</Text>
+        <Text variant="heading">{isOffline ? tr('state.offlineTitle') : tr('state.brokeTitle')}</Text>
       </View>
 
       <Text variant="callout" tone="muted">
@@ -111,16 +114,18 @@ export function ErrorState({ error, onRetry }: { error: ApiError; onRetry?: () =
 
       {isOffline ? (
         <Text variant="caption" tone="subtle">
-          Start the API with{'  '}
+          {tr('state.offlineHintPre')}
+          {'  '}
           <Text variant="caption" tone="accent">
             uvicorn app.main:app --reload
           </Text>
-          {'  '}in apps/api, then try again.
+          {'  '}
+          {tr('state.offlineHintPost')}
         </Text>
       ) : null}
 
       {onRetry && error.isRetryable ? (
-        <Button title="Try again" variant="secondary" icon="refresh" onPress={onRetry} />
+        <Button title={tr('common.tryAgain')} variant="secondary" icon="refresh" onPress={onRetry} />
       ) : null}
     </Card>
   );
@@ -128,12 +133,13 @@ export function ErrorState({ error, onRetry }: { error: ApiError; onRetry?: () =
 
 /** Prompt shown where a signed-out user hits something that needs an account. */
 export function SignInPrompt({ message, onPress }: { message: string; onPress: () => void }) {
+  const { t: tr } = useLocale();
   return (
     <EmptyState
       icon="bookmark-outline"
-      title="Keep this with you"
+      title={tr('state.signinTitle')}
       message={message}
-      actionLabel="Sign in"
+      actionLabel={tr('signin.signInBtn')}
       onAction={onPress}
     />
   );
