@@ -20,6 +20,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 
+import { selectFeedback, tapFeedback } from '@/components/haptics';
 import { useTheme } from '@/theme';
 
 // ---------------------------------------------------------------------------
@@ -155,6 +156,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: !!isDisabled, busy: !!loading }}
       disabled={isDisabled}
+      onPressIn={tapFeedback}
       style={({ pressed }) => [
         styles.button,
         {
@@ -200,7 +202,14 @@ export function Pill({ label, selected, onPress, icon }: PillProps) {
     <Pressable
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityState={{ selected }}
-      onPress={onPress}
+      onPress={
+        onPress
+          ? () => {
+              tapFeedback();
+              onPress();
+            }
+          : undefined
+      }
       style={({ pressed }) => [
         styles.pill,
         {
@@ -250,7 +259,10 @@ export function Segmented<T extends string>({
         return (
           <Pressable
             key={option.value}
-            onPress={() => onChange(option.value)}
+            onPress={() => {
+              selectFeedback();
+              onChange(option.value);
+            }}
             accessibilityRole="button"
             accessibilityState={{ selected: active }}
             style={[

@@ -11,6 +11,7 @@ import { usePathname, useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Glass } from '@/components/glass';
 import { Text } from '@/components/ui';
 import { useAuth } from '@/state/auth';
 import { useLocale } from '@/state/locale';
@@ -54,14 +55,10 @@ export function AppNav() {
   // -------- Phone: bottom bar --------
   if (width < WIDE) {
     return (
-      <View
+      <Glass
         style={[
           styles.bottombar,
-          {
-            backgroundColor: t.colors.surface,
-            borderTopColor: t.colors.border,
-            paddingBottom: insets.bottom,
-          },
+          { borderTopColor: t.colors.border, paddingBottom: insets.bottom },
         ]}
       >
         {ROUTES.map((r) => {
@@ -85,17 +82,16 @@ export function AppNav() {
             </Pressable>
           );
         })}
-      </View>
+      </Glass>
     );
   }
 
   // -------- Wide: Lumen sidebar --------
   return (
-    <View
+    <Glass
       style={[
         styles.sidebar,
         {
-          backgroundColor: t.colors.surface,
           borderRightColor: t.colors.border,
           paddingTop: insets.top + 20,
           paddingBottom: insets.bottom + 14,
@@ -172,7 +168,7 @@ export function AppNav() {
           </Text>
         </View>
       </Pressable>
-    </View>
+    </Glass>
   );
 }
 

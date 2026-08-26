@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
+import { Glass } from '@/components/glass';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Pill, Segmented, Text } from '@/components/ui';
 import { ExplanationView, VerseLine } from '@/components/verse';
@@ -180,12 +181,7 @@ export default function ReadScreen() {
 
       {/* Context Inspector (wide screens) */}
       {wide ? (
-        <View
-          style={[
-            styles.inspector,
-            { backgroundColor: t.colors.surface, borderLeftColor: t.colors.border },
-          ]}
-        >
+        <Glass style={[styles.inspector, { borderLeftColor: t.colors.border }]}>
           <View style={[styles.inspectorHead, { borderBottomColor: t.colors.border }]}>
             <Text variant="heading">{tr('inspector.title')}</Text>
           </View>
@@ -212,7 +208,7 @@ export default function ReadScreen() {
               />
             ) : null}
           </ScrollView>
-        </View>
+        </Glass>
       ) : null}
     </View>
   );

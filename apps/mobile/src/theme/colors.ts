@@ -2,7 +2,7 @@
  * Palette.
  *
  * The app is meant to feel like real paper: a soft, near-white linen page, ink
- * text, a calm slate-blue accent for actions, and muted gold reserved for premium.
+ * text, and a warm gold accent — the colour of the Selah mark itself.
  * Scripture is always the highest-contrast thing on screen — chrome recedes.
  */
 
@@ -44,50 +44,50 @@ export interface Colors {
 
 export const palette: Record<ColorScheme, Colors> = {
   light: {
-    background: '#FAF7EF',
-    surface: '#FFFDF8',
-    surfaceMuted: '#F0EADD',
-    border: '#E5DECF',
+    background: '#FAF5EA',
+    surface: '#FFFDF6',
+    surfaceMuted: '#F1E9D6',
+    border: '#E7DEC9',
 
-    text: '#201D19',
-    textMuted: '#777066',
-    textSubtle: '#A79E8B',
+    text: '#221E17',
+    textMuted: '#756B58',
+    textSubtle: '#A79C84',
     textOnAccent: '#FFFFFF',
 
-    accent: '#4E7C93',
-    accentPressed: '#3F6579',
-    accentMuted: '#E7EEF1',
+    accent: '#A48350',
+    accentPressed: '#8C6E3E',
+    accentMuted: '#F1E7CF',
 
     gold: '#A48350',
-    goldMuted: '#F0E8D6',
+    goldMuted: '#F1E7CF',
 
-    highlight: '#F3E9D3',
+    highlight: '#F3E7CB',
 
     danger: '#B3261E',
     dangerMuted: '#F6E5E0',
   },
 
-  // Night reading: a soft cool near-black (matching the mockup's dark), warm-white
-  // text, and the same slate-blue accent lifted for contrast.
+  // Night reading: a warm near-black ground, warm off-white text, and a brighter
+  // gold accent lifted for contrast.
   dark: {
-    background: '#0A0B0C',
-    surface: '#121315',
-    surfaceMuted: '#1B1D1F',
-    border: '#2C2E31',
+    background: '#0C0B08',
+    surface: '#16130D',
+    surfaceMuted: '#201B12',
+    border: '#322B1E',
 
-    text: '#EEE9DF',
-    textMuted: '#9C9992',
-    textSubtle: '#6C6A65',
-    textOnAccent: '#121315',
+    text: '#EDE7D6',
+    textMuted: '#A79C86',
+    textSubtle: '#746B57',
+    textOnAccent: '#16130D',
 
-    accent: '#71A1B8',
-    accentPressed: '#5C8AA2',
-    accentMuted: '#17242A',
+    accent: '#CBA96A',
+    accentPressed: '#B18F52',
+    accentMuted: '#241D10',
 
-    gold: '#C8A96E',
-    goldMuted: '#241F13',
+    gold: '#CBA96A',
+    goldMuted: '#241D10',
 
-    highlight: '#17242A',
+    highlight: '#241D10',
 
     danger: '#F2B8B5',
     dangerMuted: '#2A1513',
