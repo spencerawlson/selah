@@ -19,7 +19,7 @@ import { useAsync } from '@/api/useAsync';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Pill, Segmented, Text } from '@/components/ui';
 import { ExplanationView, VerseLine } from '@/components/verse';
-import { useLocale } from '@/state/locale';
+import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useReader } from '@/state/reader';
 import { useTheme } from '@/theme';
 
@@ -57,8 +57,11 @@ export default function ReadScreen() {
     [chapterId],
   );
   const verses = useAsync(
-    (signal) => (chapterId ? api.getVerses(chapterId, signal) : Promise.resolve([] as Verse[])),
-    [chapterId],
+    (signal) =>
+      chapterId
+        ? api.getVerses(chapterId, TRANSLATION_FOR[locale], signal)
+        : Promise.resolve([] as Verse[]),
+    [chapterId, locale],
   );
 
   const openVerse = useCallback(
@@ -193,7 +196,7 @@ export default function ReadScreen() {
                 explanation={explanation}
                 onSelectRelated={async (reference) => {
                   try {
-                    const target = await api.lookupVerse(reference);
+                    const target = await api.lookupVerse(reference, TRANSLATION_FOR[locale]);
                     void openVerse(target);
                   } catch {
                     /* not in the sample set */

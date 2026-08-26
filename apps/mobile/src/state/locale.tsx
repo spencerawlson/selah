@@ -31,6 +31,15 @@ export const LOCALES: { value: Locale; label: string }[] = [
   { value: 'ht', label: 'Kreyòl' },
 ];
 
+/** Which Bible translation to read in each language. Haitian Creole has no
+ * scripture loaded yet, so it falls back to English. */
+export const TRANSLATION_FOR: Record<Locale, string> = {
+  en: 'WEB',
+  fr: 'OST',
+  es: 'RVR',
+  ht: 'WEB',
+};
+
 const KEY = 'selah.locale';
 
 type Dict = Record<string, string>;

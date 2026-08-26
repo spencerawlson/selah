@@ -45,14 +45,20 @@ export const getChapters = (bookId: string | number, signal?: AbortSignal) =>
 export const getChapter = (chapterId: number, signal?: AbortSignal) =>
   request<ChapterWithBook>(`/chapters/${chapterId}`, { signal });
 
-export const getVerses = (chapterId: number, signal?: AbortSignal) =>
-  request<Verse[]>(`/chapters/${chapterId}/verses`, { signal });
+export const getVerses = (chapterId: number, translation?: string, signal?: AbortSignal) =>
+  request<Verse[]>(`/chapters/${chapterId}/verses`, {
+    query: translation ? { translation } : undefined,
+    signal,
+  });
 
 export const getVerse = (verseId: number, signal?: AbortSignal) =>
   request<Verse>(`/verses/${verseId}`, { signal });
 
-export const lookupVerse = (reference: string, signal?: AbortSignal) =>
-  request<Verse>('/verses', { query: { reference }, signal });
+export const lookupVerse = (reference: string, translation?: string, signal?: AbortSignal) =>
+  request<Verse>('/verses', {
+    query: translation ? { reference, translation } : { reference },
+    signal,
+  });
 
 export const searchVerses = (q: string, signal?: AbortSignal) =>
   request<Page<Verse>>('/search', { query: { q, limit: 30 }, signal });

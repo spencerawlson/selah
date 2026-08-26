@@ -29,6 +29,8 @@ from app.services.auth_service import DEMO_EMAIL, DEMO_PASSWORD
 
 SEED_DIR = Path(__file__).resolve().parents[2] / "data" / "seed"
 BIBLE_SEED = SEED_DIR / "bible.json"
+# Extra translations layered onto the same chapters (verses only): French, Spanish.
+EXTRA_TRANSLATIONS = [SEED_DIR / "bible.fr.json", SEED_DIR / "bible.es.json"]
 
 
 def load_seed() -> dict[str, Any]:
@@ -125,6 +127,62 @@ async def seed_bible(session: AsyncSession) -> tuple[int, int]:
     return len(books), verse_total
 
 
+async def seed_translation(session: AsyncSession, path: Path) -> tuple[str, int]:
+    """Layer one more translation's verses onto chapters that already exist.
+
+    Books and chapters are shared across translations, so this only adds Verse
+    rows. Chapters that were never seeded in English are skipped, never invented.
+    """
+    data = json.loads(path.read_text(encoding="utf-8"))
+    translation = await _upsert_translation(session, data["translation"])
+
+    verse_total = 0
+    for entry in data["chapters"]:
+        book = await session.scalar(select(Book).where(Book.slug == entry["book"]))
+        if book is None:
+            logger.warning("Skipping %s: book '%s' is not seeded.", translation.code, entry["book"])
+            continue
+        chapter = await session.scalar(
+            select(Chapter).where(Chapter.book_id == book.id, Chapter.number == entry["number"])
+        )
+        if chapter is None:
+            logger.warning(
+                "Skipping %s %s %s: chapter not seeded.",
+                translation.code,
+                entry["book"],
+                entry["number"],
+            )
+            continue
+
+        existing = {
+            v.number: v
+            for v in await session.scalars(
+                select(Verse).where(
+                    Verse.chapter_id == chapter.id, Verse.translation_id == translation.id
+                )
+            )
+        }
+        for index, text in enumerate(entry["verses"], start=1):
+            reference = f"{book.reference_name} {chapter.number}:{index}"
+            if index in existing:
+                existing[index].text = text
+                existing[index].reference = reference
+            else:
+                session.add(
+                    Verse(
+                        chapter_id=chapter.id,
+                        translation_id=translation.id,
+                        number=index,
+                        text=text,
+                        reference=reference,
+                    )
+                )
+            verse_total += 1
+
+    await session.flush()
+    return translation.code, verse_total
+
+
 async def seed_demo_user(session: AsyncSession) -> User | None:
     """Create the demo account — local development only.
 
@@ -161,10 +219,15 @@ async def run(reset: bool = False) -> None:
 
     async with SessionLocal() as session:
         books, verses = await seed_bible(session)
+        extra = [
+            await seed_translation(session, path) for path in EXTRA_TRANSLATIONS if path.exists()
+        ]
         user = await seed_demo_user(session)
         await session.commit()
 
     logger.info("Seeded %s books and %s verses", books, verses)
+    for code, count in extra:
+        logger.info("Added translation %s: %s verses", code, count)
     if user:
         logger.info("Demo account: %s / %s", DEMO_EMAIL, DEMO_PASSWORD)
 

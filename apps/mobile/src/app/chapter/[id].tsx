@@ -20,6 +20,7 @@ import { ErrorState, LoadingState } from '@/components/states';
 import { Button, Card, Divider, Row, Segmented, Text } from '@/components/ui';
 import { VerseLine } from '@/components/verse';
 import { useAuth } from '@/state/auth';
+import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useReader } from '@/state/reader';
 import { useTheme } from '@/theme';
 
@@ -29,6 +30,7 @@ export default function ChapterScreen() {
   const insets = useSafeAreaInsets();
   const { isSignedIn } = useAuth();
   const { mode, setMode } = useReader();
+  const { locale } = useLocale();
   const immersion = mode === 'immersion';
 
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -39,7 +41,10 @@ export default function ChapterScreen() {
   const [summarizing, setSummarizing] = useState(false);
 
   const chapter = useAsync((signal) => api.getChapter(chapterId, signal), [chapterId]);
-  const verses = useAsync((signal) => api.getVerses(chapterId, signal), [chapterId]);
+  const verses = useAsync(
+    (signal) => api.getVerses(chapterId, TRANSLATION_FOR[locale], signal),
+    [chapterId, locale],
+  );
 
   const title = chapter.data ? `${chapter.data.book_name} ${chapter.data.number}` : '';
 
