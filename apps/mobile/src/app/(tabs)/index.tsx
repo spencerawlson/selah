@@ -21,6 +21,13 @@ import { useAuth } from '@/state/auth';
 import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
+// Warm devotional art, rotating daily behind the verse of the day.
+const HERO_IMAGES = [
+  require('../../assets/today/jesus1.jpg'),
+  require('../../assets/today/jesus2.jpg'),
+  require('../../assets/today/jesus3.jpg'),
+];
+
 function greetingKey(date = new Date()): string {
   const hour = date.getHours();
   if (hour < 12) return 'today.morning';
@@ -48,6 +55,7 @@ export default function TodayScreen() {
 
   const name = user?.display_name.split(' ')[0];
   const votd = data?.verse_of_the_day;
+  const heroImage = HERO_IMAGES[new Date().getDate() % HERO_IMAGES.length];
 
   return (
     <Screen
@@ -65,6 +73,7 @@ export default function TodayScreen() {
             verse={votd.verse}
             label={tr('today.votd')}
             date={formatDate(data?.date)}
+            image={heroImage}
             onPress={() => router.push(`/verse/${votd.verse.id}`)}
           />
           <Button
