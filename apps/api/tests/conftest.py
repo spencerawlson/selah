@@ -13,6 +13,9 @@ from collections.abc import AsyncIterator
 os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 os.environ.setdefault("AI_PROVIDER", "mock")
 os.environ.setdefault("ENVIRONMENT", "local")
+# The suite hammers the credential and explanation endpoints on one client IP;
+# throttling is exercised by its own test, not left on to make the rest flaky.
+os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 
 import pytest  # noqa: E402
 from httpx import ASGITransport, AsyncClient  # noqa: E402

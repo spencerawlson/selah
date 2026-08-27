@@ -24,7 +24,9 @@ class ExplanationRequest(BaseModel):
     """Ask for an explanation by verse id *or* by human reference."""
 
     verse_id: int | None = None
-    reference: str | None = Field(default=None, examples=["John 3:16"])
+    # Bounded: this is user-supplied free text that reaches the reference parser
+    # and, on a cache miss, the AI prompt. "3 John 1:14" is the longest real case.
+    reference: str | None = Field(default=None, max_length=64, examples=["John 3:16"])
     translation_code: str = Field(default="WEB", max_length=16)
     tone: Tone = "plain"
     language: Literal["en", "fr", "es"] = "en"

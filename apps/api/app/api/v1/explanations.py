@@ -2,14 +2,20 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import OptionalUser, SessionDep
+from app.core.config import settings
+from app.core.ratelimit import RateLimit
 from app.schemas.bible import ChapterRead, VerseRead
 from app.schemas.study import ExplanationRead, ExplanationRequest, ExplanationWithVerse
 from app.services import explanation_service
 
 router = APIRouter(tags=["explanations"])
+
+# Generation is billable; cap it per client so a cache miss can't be weaponised
+# into a spend loop. Cache hits still pass through cheaply under the same cap.
+_ai_limit = RateLimit(settings.ai_rate_per_minute, 60, scope="ai")
 
 
 @router.post(
@@ -17,6 +23,7 @@ router = APIRouter(tags=["explanations"])
     response_model=ExplanationWithVerse,
     status_code=status.HTTP_200_OK,
     summary="Explain a verse",
+    dependencies=[Depends(_ai_limit)],
 )
 async def create_verse_explanation(
     session: SessionDep,
@@ -57,6 +64,7 @@ async def create_verse_explanation(
     "/chapters/{chapter_id}/summary",
     response_model=ChapterRead,
     summary="Summarise a chapter",
+    dependencies=[Depends(_ai_limit)],
 )
 async def create_chapter_summary(
     session: SessionDep,

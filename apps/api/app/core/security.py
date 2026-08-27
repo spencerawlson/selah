@@ -24,7 +24,9 @@ import jwt
 from app.core.config import settings
 from app.core.errors import AuthError
 
-_PBKDF2_ROUNDS = 240_000
+# OWASP's 2023 floor for PBKDF2-HMAC-SHA256. Old hashes still verify — the round
+# count is read back from each stored hash — so raising this is backward safe.
+_PBKDF2_ROUNDS = 600_000
 _SALT_BYTES = 16
 
 

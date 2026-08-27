@@ -36,9 +36,12 @@ class AppError(Exception):
         message: str | None = None,
         *,
         details: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         self.message = message or self.message
         self.details = details or {}
+        # Extra response headers (e.g. Retry-After on a 429). Applied by the handler.
+        self.headers = headers or {}
         super().__init__(self.message)
 
 
@@ -80,6 +83,24 @@ class UpstreamError(AppError):
     message = "An upstream service is unavailable. Please try again."
 
 
+class RateLimitError(AppError):
+    """The client has made too many requests in too short a window."""
+
+    status_code = status.HTTP_429_TOO_MANY_REQUESTS
+    code = "rate_limited"
+    message = "Too many requests. Please slow down and try again shortly."
+
+    def __init__(
+        self,
+        message: str | None = None,
+        *,
+        retry_after: int | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        headers = {"Retry-After": str(retry_after)} if retry_after is not None else None
+        super().__init__(message, details=details, headers=headers)
+
+
 def _envelope(
     code: str, message: str, details: dict[str, Any] | None = None
 ) -> dict[str, dict[str, Any]]:
@@ -94,6 +115,7 @@ def register_exception_handlers(app: FastAPI) -> None:
         return JSONResponse(
             status_code=exc.status_code,
             content=_envelope(exc.code, exc.message, exc.details),
+            headers=exc.headers or None,
         )
 
     @app.exception_handler(RequestValidationError)

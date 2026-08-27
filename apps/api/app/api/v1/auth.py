@@ -6,13 +6,21 @@ move to Firebase or Supabase.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 
 from app.api.deps import CurrentUser, SessionDep
+from app.core.config import settings
+from app.core.ratelimit import RateLimit
 from app.schemas.auth import AuthSession, SignInRequest, SignUpRequest, UserRead
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Throttle the credential endpoints: sign-up guards against spam accounts,
+# sign-in against password brute force. Counts come from settings so a
+# deployment can tighten them without a code change.
+_signup_limit = RateLimit(settings.signup_rate_per_hour, 3600, scope="signup")
+_signin_limit = RateLimit(settings.auth_rate_per_minute, 60, scope="signin")
 
 
 @router.post(
@@ -20,6 +28,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     response_model=AuthSession,
     status_code=status.HTTP_201_CREATED,
     summary="Create an account",
+    dependencies=[Depends(_signup_limit)],
 )
 async def sign_up(session: SessionDep, payload: SignUpRequest) -> AuthSession:
     user, token, expires_in = await auth_service.sign_up(
@@ -33,7 +42,12 @@ async def sign_up(session: SessionDep, payload: SignUpRequest) -> AuthSession:
     )
 
 
-@router.post("/sign-in", response_model=AuthSession, summary="Sign in")
+@router.post(
+    "/sign-in",
+    response_model=AuthSession,
+    summary="Sign in",
+    dependencies=[Depends(_signin_limit)],
+)
 async def sign_in(session: SessionDep, payload: SignInRequest) -> AuthSession:
     user, token, expires_in = await auth_service.sign_in(
         session, email=payload.email, password=payload.password
