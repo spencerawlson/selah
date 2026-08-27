@@ -7,11 +7,11 @@
 
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import { Screen } from '@/components/screen';
-import { Button, Card, Divider, Text } from '@/components/ui';
+import { Button, Card, Divider, Input, Text } from '@/components/ui';
 import { useAuth } from '@/state/auth';
 import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
@@ -41,19 +41,16 @@ export default function SignInScreen() {
     try {
       if (isSignUp) await signUp(email, password, displayName);
       else await signIn(email, password);
-      router.back();
+      // Return to wherever the prompt came from, but never dead-end on web where
+      // sign-in may have been the first route (back would do nothing).
+      if (router.canGoBack()) router.back();
+      else router.replace('/(tabs)');
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : tr('common.somethingWrong'));
     } finally {
       setBusy(false);
     }
   }
-
-  const inputStyle = [
-    styles.input,
-    t.typography.body,
-    { backgroundColor: t.colors.surfaceMuted, borderRadius: t.radius.md, color: t.colors.text },
-  ];
 
   return (
     <KeyboardAvoidingView
@@ -67,42 +64,39 @@ export default function SignInScreen() {
       >
         <Card style={{ gap: t.spacing.md }}>
           {isSignUp ? (
-            <TextInput
+            <Input
+              icon="person-outline"
               value={displayName}
               onChangeText={setDisplayName}
               placeholder={tr('signin.name')}
-              placeholderTextColor={t.colors.textSubtle}
               autoCapitalize="words"
               autoComplete="name"
               accessibilityLabel="Your name"
-              style={inputStyle}
             />
           ) : null}
 
-          <TextInput
+          <Input
+            icon="mail-outline"
             value={email}
             onChangeText={setEmail}
             placeholder={tr('signin.email')}
-            placeholderTextColor={t.colors.textSubtle}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
             autoComplete="email"
             accessibilityLabel="Email"
-            style={inputStyle}
           />
 
-          <TextInput
+          <Input
+            icon="lock-closed-outline"
             value={password}
             onChangeText={setPassword}
             placeholder={tr('signin.password')}
-            placeholderTextColor={t.colors.textSubtle}
             secureTextEntry
             autoCapitalize="none"
             autoComplete={isSignUp ? 'new-password' : 'current-password'}
             accessibilityLabel="Password"
             onSubmitEditing={() => canSubmit && void submit()}
-            style={inputStyle}
           />
 
           {error ? (
@@ -159,5 +153,4 @@ export default function SignInScreen() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1 },
-  input: { minHeight: 48, paddingHorizontal: 14, paddingVertical: 12 },
 });

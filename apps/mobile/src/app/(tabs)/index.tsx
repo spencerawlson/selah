@@ -8,6 +8,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 
 import * as api from '@/api/endpoints';
@@ -55,7 +56,14 @@ export default function TodayScreen() {
 
   const name = user?.display_name.split(' ')[0];
   const votd = data?.verse_of_the_day;
-  const heroImage = HERO_IMAGES[new Date().getDate() % HERO_IMAGES.length];
+
+  // Start on a day-seeded image, then rotate through all three every 2.5 minutes.
+  const [heroIndex, setHeroIndex] = useState(() => new Date().getDate() % HERO_IMAGES.length);
+  useEffect(() => {
+    const id = setInterval(() => setHeroIndex((i) => (i + 1) % HERO_IMAGES.length), 150_000);
+    return () => clearInterval(id);
+  }, []);
+  const heroImage = HERO_IMAGES[heroIndex];
 
   return (
     <Screen
@@ -69,13 +77,16 @@ export default function TodayScreen() {
 
       {votd ? (
         <FadeIn style={{ gap: t.spacing.lg }}>
-          <VerseHero
-            verse={votd.verse}
-            label={tr('today.votd')}
-            date={formatDate(data?.date)}
-            image={heroImage}
-            onPress={() => router.push(`/verse/${votd.verse.id}`)}
-          />
+          {/* Keyed by the image index so each rotation gently fades in. */}
+          <FadeIn key={heroIndex}>
+            <VerseHero
+              verse={votd.verse}
+              label={tr('today.votd')}
+              date={formatDate(data?.date)}
+              image={heroImage}
+              onPress={() => router.push(`/verse/${votd.verse.id}`)}
+            />
+          </FadeIn>
           <Button
             title={tr('today.reflect')}
             icon="sparkles-outline"

@@ -8,14 +8,14 @@
 import type { Tone } from '@selah/shared';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
 import { Screen } from '@/components/screen';
 import { ErrorState, GeneratingState } from '@/components/states';
-import { Button, Card, Pill, Row, SectionHeader, Text } from '@/components/ui';
+import { Button, Card, Input, Pill, Row, SectionHeader, Text } from '@/components/ui';
 import { ExplanationView, VerseCard } from '@/components/verse';
 import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
@@ -91,25 +91,16 @@ export default function StudyScreen() {
   return (
     <Screen title={tr('nav.study')} subtitle={tr('study.subtitle')}>
       <Card style={{ gap: t.spacing.md, marginBottom: t.spacing.xl }}>
-        <TextInput
+        <Input
+          icon="search-outline"
           value={query}
           onChangeText={setQuery}
           onSubmitEditing={submit}
           placeholder={tr('study.placeholder')}
-          placeholderTextColor={t.colors.textSubtle}
           returnKeyType="search"
           autoCapitalize="none"
           autoCorrect={false}
           accessibilityLabel="Verse reference or search phrase"
-          style={[
-            styles.input,
-            t.typography.body,
-            {
-              backgroundColor: t.colors.surfaceMuted,
-              borderRadius: t.radius.md,
-              color: t.colors.text,
-            },
-          ]}
         />
 
         <Row gap={8} style={styles.wrap}>
@@ -178,6 +169,5 @@ export default function StudyScreen() {
 }
 
 const styles = StyleSheet.create({
-  input: { minHeight: 48, paddingHorizontal: 14, paddingVertical: 12 },
   wrap: { flexWrap: 'wrap' },
 });

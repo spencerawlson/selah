@@ -13,6 +13,8 @@ import {
   type PressableProps,
   StyleSheet,
   Text as RNText,
+  TextInput as RNTextInput,
+  type TextInputProps,
   type TextProps as RNTextProps,
   type TextStyle,
   View,
@@ -192,6 +194,37 @@ export function Button({
 }
 
 // ---------------------------------------------------------------------------
+// Input — a text field that actually looks like one
+// ---------------------------------------------------------------------------
+interface InputProps extends TextInputProps {
+  /** A leading icon makes the field unmistakable — e.g. a search glass. */
+  icon?: keyof typeof Ionicons.glyphMap;
+}
+
+export function Input({ icon, style, ...rest }: InputProps) {
+  const t = useTheme();
+  return (
+    <View
+      style={[
+        styles.inputWrap,
+        {
+          backgroundColor: t.colors.surface,
+          borderColor: t.colors.border,
+          borderRadius: t.radius.md,
+        },
+      ]}
+    >
+      {icon ? <Ionicons name={icon} size={18} color={t.colors.textSubtle} /> : null}
+      <RNTextInput
+        placeholderTextColor={t.colors.textSubtle}
+        style={[styles.input, t.typography.body as TextStyle, { color: t.colors.text }, style]}
+        {...rest}
+      />
+    </View>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Pill — filter chips and tone selectors
 // ---------------------------------------------------------------------------
 interface PillProps {
@@ -338,4 +371,13 @@ const styles = StyleSheet.create({
   segmented: { flexDirection: 'row', alignSelf: 'center', padding: 3, borderWidth: StyleSheet.hairlineWidth },
   segment: { paddingHorizontal: 20, paddingVertical: 7 },
   badge: { paddingHorizontal: 7, paddingVertical: 3 },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 14,
+    minHeight: 52,
+    borderWidth: 1,
+  },
+  input: { flex: 1, paddingVertical: 12 },
 });

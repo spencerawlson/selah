@@ -326,9 +326,10 @@ const styles = StyleSheet.create({
   heroFooter: { marginTop: 20 },
   imageArt: {
     width: '100%',
-    // Locked to the source images' exact ratio (1408×768) so "cover" fills the
-    // card with no cropping at all — the whole picture always shows.
-    aspectRatio: 1.833,
+    // A tall devotional frame with the verse centered in it. The source art is
+    // landscape (1408×768) with the subject centered, so "cover" trims the sides,
+    // never the subject.
+    height: 480,
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
