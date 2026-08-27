@@ -80,6 +80,24 @@ async def test_malformed_reference_is_a_validation_error(client: AsyncClient) ->
     assert response.json()["error"]["code"] == "validation_error"
 
 
+def test_book_names_resolve_across_languages() -> None:
+    """A reader types the book name in their own language; it must resolve."""
+    from app.services.book_aliases import resolve_book
+
+    assert resolve_book("Acts") == "acts"
+    assert resolve_book("Actes") == "acts"  # French
+    assert resolve_book("Hechos") == "acts"  # Spanish
+    assert resolve_book("Génesis") == "genesis"
+    assert resolve_book("Ésaïe") == "isaiah"
+    assert resolve_book("1 Corinthiens") == "1-corinthians"
+    assert resolve_book("Apocalipsis") == "revelation"
+    assert resolve_book("Ps") == "psalms"
+    # The localized singular citation forms the app displays must resolve too.
+    assert resolve_book("Psaume") == "psalms"  # French
+    assert resolve_book("Salmo") == "psalms"  # Spanish
+    assert resolve_book("not a book") is None
+
+
 async def test_explanation_needs_exactly_one_target(client: AsyncClient) -> None:
     response = await client.post(
         "/api/v1/verse-explanations", json={"verse_id": 1, "reference": "John 3:16"}

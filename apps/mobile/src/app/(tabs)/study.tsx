@@ -27,9 +27,10 @@ const TONES: { value: Tone; label: string }[] = [
   { value: 'kids', label: 'For kids' },
 ];
 
-/** Looks like a reference ("John 3:16") rather than a search phrase. */
+/** Looks like a reference ("John 3:16", "Ésaïe 40:31") rather than a search phrase. */
 function isReference(input: string): boolean {
-  return /^\s*(?:[1-3]\s*)?[A-Za-z][A-Za-z\s.]*\s*\d+\s*[:.]\s*\d+\s*$/.test(input);
+  // Accented letters included so French/Spanish book names count as references.
+  return /^\s*(?:[1-3]\s*)?[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s.]*\s*\d+\s*[:.]\s*\d+\s*$/.test(input);
 }
 
 export default function StudyScreen() {

@@ -28,7 +28,7 @@ from sqlalchemy.pool import StaticPool  # noqa: E402
 
 from app.api.deps import get_session  # noqa: E402
 from app.db.base import Base  # noqa: E402
-from app.db.seed import seed_bible, seed_demo_user  # noqa: E402
+from app.db.seed import BIBLE_SAMPLE, seed_bible, seed_demo_user  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models import *  # noqa: F401,F403,E402  - registers every table
 
@@ -46,7 +46,7 @@ async def session_factory() -> AsyncIterator[async_sessionmaker[AsyncSession]]:
 
     factory = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with factory() as session:
-        await seed_bible(session)
+        await seed_bible(session, BIBLE_SAMPLE)  # small, fast subset for tests
         await seed_demo_user(session)
         await session.commit()
 

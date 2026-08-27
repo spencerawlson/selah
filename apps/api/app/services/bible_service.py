@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundError, ValidationError
 from app.models.bible import Book, Chapter, Testament, Translation, Verse
+from app.services.book_aliases import resolve_book
 from app.services.reference import parse_reference, slugify
 
 DEFAULT_TRANSLATION = "WEB"
@@ -128,7 +129,9 @@ async def get_verse_by_reference(
         )
 
     translation = await get_translation(session, translation_code)
-    slug = slugify(parsed.book_query)
+    # Resolve the book name across English/French/Spanish ("Actes" -> "acts");
+    # fall back to a plain slugify for anything the alias table doesn't cover.
+    slug = resolve_book(parsed.book_query) or slugify(parsed.book_query)
     verse = await session.scalar(
         select(Verse)
         .join(Chapter, Verse.chapter_id == Chapter.id)

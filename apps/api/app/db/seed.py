@@ -26,15 +26,14 @@ from app.db.session import SessionLocal, dispose_db, engine, init_db
 from app.models.bible import Book, Chapter, Testament, Translation, Verse
 from app.models.user import User
 from app.services.auth_service import DEMO_EMAIL, DEMO_PASSWORD
+from app.services.canon import BY_SLUG
 
 SEED_DIR = Path(__file__).resolve().parents[2] / "data" / "seed"
 BIBLE_SEED = SEED_DIR / "bible.json"
+# A tiny, fast subset (a handful of chapters) for the test suite.
+BIBLE_SAMPLE = SEED_DIR / "bible.sample.json"
 # Extra translations layered onto the same chapters (verses only): French, Spanish.
 EXTRA_TRANSLATIONS = [SEED_DIR / "bible.fr.json", SEED_DIR / "bible.es.json"]
-
-
-def load_seed() -> dict[str, Any]:
-    return json.loads(BIBLE_SEED.read_text(encoding="utf-8"))
 
 
 async def _upsert_translation(session: AsyncSession, payload: dict[str, Any]) -> Translation:
@@ -79,9 +78,9 @@ async def _upsert_chapter(session: AsyncSession, book: Book, number: int, count:
     return chapter
 
 
-async def seed_bible(session: AsyncSession) -> tuple[int, int]:
+async def seed_bible(session: AsyncSession, path: Path = BIBLE_SEED) -> tuple[int, int]:
     """Load translation, books, chapters and verses. Returns (books, verses)."""
-    data = load_seed()
+    data = json.loads(path.read_text(encoding="utf-8"))
     translation = await _upsert_translation(session, data["translation"])
     books = {b["slug"]: await _upsert_book(session, b) for b in data["books"]}
 
@@ -154,6 +153,12 @@ async def seed_translation(session: AsyncSession, path: Path) -> tuple[str, int]
             )
             continue
 
+        # Cite the verse in the translation's own language ("Actes 20:24").
+        canon = BY_SLUG.get(book.slug)
+        ref_name = (
+            canon.reference_name_for(translation.language) if canon else book.reference_name
+        )
+
         existing = {
             v.number: v
             for v in await session.scalars(
@@ -163,7 +168,7 @@ async def seed_translation(session: AsyncSession, path: Path) -> tuple[str, int]
             )
         }
         for index, text in enumerate(entry["verses"], start=1):
-            reference = f"{book.reference_name} {chapter.number}:{index}"
+            reference = f"{ref_name} {chapter.number}:{index}"
             if index in existing:
                 existing[index].text = text
                 existing[index].reference = reference

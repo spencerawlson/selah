@@ -11,8 +11,11 @@ import re
 import unicodedata
 from dataclasses import dataclass
 
+# The book name may carry accents (French/Spanish: "Ésaïe", "Génesis") and
+# spaces ("Cantique des Cantiques"), so it is "a letter, then anything up to the
+# chapter number that isn't a digit or a separator" rather than ASCII-only.
 _REFERENCE_RE = re.compile(
-    r"^\s*(?P<book>(?:[1-3]\s*)?[A-Za-z][A-Za-z\s.]*?)\s*"
+    r"^\s*(?P<book>(?:[1-3]\s*)?[^\W\d_][^\d:.]*?)\s*"
     r"(?P<chapter>\d+)\s*[:.]\s*(?P<verse>\d+)\s*$"
 )
 
