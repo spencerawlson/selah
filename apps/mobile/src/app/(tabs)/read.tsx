@@ -8,17 +8,18 @@
  * opens the full explanation screen instead.
  */
 
-import type { ExplanationWithVerse, Verse } from '@selah/shared';
+import { Ionicons } from '@expo/vector-icons';
+import type { ExplanationWithVerse, Testament, Verse } from '@selah/shared';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { PanResponder, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { PanResponder, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
 import { Glass } from '@/components/glass';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
-import { Pill, Segmented, Text } from '@/components/ui';
+import { Pill, Row, Segmented, Text } from '@/components/ui';
 import { ExplanationView, VerseLine } from '@/components/verse';
 import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useReader } from '@/state/reader';
@@ -41,6 +42,8 @@ export default function ReadScreen() {
   const [selected, setSelected] = useState<Verse | null>(null);
   const [explanation, setExplanation] = useState<ExplanationWithVerse | null>(null);
   const [explaining, setExplaining] = useState(false);
+  const [testament, setTestament] = useState<Testament>('new');
+  const [pickerOpen, setPickerOpen] = useState(true);
 
   const books = useAsync((signal) => api.getBooks(signal), []);
   const chapters = useAsync((signal) => api.getChapters(slug, signal), [slug]);
@@ -52,6 +55,16 @@ export default function ReadScreen() {
       if (!stillValid) setChapterId(chapters.data[0].id);
     }
   }, [chapters.data]);
+
+  // Line the Testament tab up with the book being read, once, on first load.
+  const didInitTestament = useRef(false);
+  useEffect(() => {
+    if (!didInitTestament.current && books.data) {
+      const current = books.data.find((b) => b.slug === slug);
+      if (current) setTestament(current.testament);
+      didInitTestament.current = true;
+    }
+  }, [books.data, slug]);
 
   const chapter = useAsync(
     (signal) => (chapterId ? api.getChapter(chapterId, signal) : Promise.resolve(null)),
@@ -104,6 +117,8 @@ export default function ReadScreen() {
     }),
   ).current;
 
+  const currentBook = books.data?.find((b) => b.slug === slug);
+  const currentBookName = chapter.data?.book_name ?? currentBook?.name ?? '';
   const title = chapter.data ? `${chapter.data.book_name} ${chapter.data.number}` : 'Reader';
 
   return (
@@ -118,32 +133,87 @@ export default function ReadScreen() {
         {...swipe.panHandlers}
       >
         <View style={styles.column}>
-          {/* Book switcher */}
+          {/* Navigation: Testament → Book → Chapter. Collapsible, and the book
+              and chapter lists wrap instead of scrolling off-screen, so every
+              book is reachable — not cut off at Samuel. */}
           {books.data ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillrow}>
-              {books.data.map((book) => (
-                <Pill
-                  key={book.id}
-                  label={book.name}
-                  selected={book.slug === slug}
-                  onPress={() => setSlug(book.slug)}
+            <View style={styles.nav}>
+              <Pressable
+                onPress={() => setPickerOpen((open) => !open)}
+                accessibilityRole="button"
+                accessibilityLabel={currentBookName}
+                style={({ pressed }) => [
+                  styles.navHeader,
+                  {
+                    backgroundColor: t.colors.surfaceMuted,
+                    borderColor: t.colors.border,
+                    borderRadius: t.radius.md,
+                    opacity: pressed ? 0.85 : 1,
+                  },
+                ]}
+              >
+                <Row gap={8}>
+                  <Ionicons name="book-outline" size={16} color={t.colors.accent} />
+                  <Text variant="heading">
+                    {currentBookName}
+                    {chapter.data ? ` ${chapter.data.number}` : ''}
+                  </Text>
+                </Row>
+                <Ionicons
+                  name={pickerOpen ? 'chevron-up' : 'chevron-down'}
+                  size={18}
+                  color={t.colors.textMuted}
                 />
-              ))}
-            </ScrollView>
-          ) : null}
+              </Pressable>
 
-          {/* Chapter switcher */}
-          {chapters.data && chapters.data.length > 1 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.pillrow}>
-              {chapters.data.map((c) => (
-                <Pill
-                  key={c.id}
-                  label={String(c.number)}
-                  selected={c.id === chapterId}
-                  onPress={() => setChapterId(c.id)}
-                />
-              ))}
-            </ScrollView>
+              {pickerOpen ? (
+                <View style={styles.picker}>
+                  <Segmented
+                    fullWidth
+                    options={[
+                      { value: 'old', label: tr('reader.ot') },
+                      { value: 'new', label: tr('reader.nt') },
+                    ]}
+                    value={testament}
+                    onChange={setTestament}
+                  />
+
+                  <View style={styles.grid}>
+                    {books.data
+                      .filter((book) => book.testament === testament)
+                      .map((book) => (
+                        <Pill
+                          key={book.id}
+                          label={book.name}
+                          selected={book.slug === slug}
+                          onPress={() => setSlug(book.slug)}
+                        />
+                      ))}
+                  </View>
+
+                  {chapters.data && chapters.data.length > 1 ? (
+                    <>
+                      <Text variant="overline" tone="subtle" style={styles.gridLabel}>
+                        {tr('reader.chapter').toUpperCase()}
+                      </Text>
+                      <View style={styles.grid}>
+                        {chapters.data.map((c) => (
+                          <Pill
+                            key={c.id}
+                            label={String(c.number)}
+                            selected={c.id === chapterId}
+                            onPress={() => {
+                              setChapterId(c.id);
+                              setPickerOpen(false); // reveal the reading once a chapter is chosen
+                            }}
+                          />
+                        ))}
+                      </View>
+                    </>
+                  ) : null}
+                </View>
+              ) : null}
+            </View>
           ) : null}
 
           {chapter.isLoading || verses.isLoading ? <LoadingState /> : null}
@@ -238,7 +308,18 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   fill: { flex: 1 },
   column: { width: '100%', maxWidth: 760, alignSelf: 'center' },
-  pillrow: { gap: 8, paddingVertical: 6, paddingRight: 8 },
+  nav: { gap: 10, marginBottom: 8 },
+  navHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  picker: { gap: 12, paddingBottom: 6 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  gridLabel: { marginTop: 2 },
   head: { alignItems: 'center', gap: 12, marginTop: 12, marginBottom: 16 },
   range: { marginBottom: 12 },
   immersionText: { lineHeight: 36 },

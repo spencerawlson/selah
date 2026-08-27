@@ -275,16 +275,20 @@ export function Segmented<T extends string>({
   options,
   value,
   onChange,
+  fullWidth,
 }: {
   options: { value: T; label: string }[];
   value: T;
   onChange: (value: T) => void;
+  /** Stretch to the container and share it evenly — right for long labels. */
+  fullWidth?: boolean;
 }) {
   const t = useTheme();
   return (
     <View
       style={[
         styles.segmented,
+        fullWidth && styles.segmentedFull,
         {
           backgroundColor: t.colors.surfaceMuted,
           borderColor: t.colors.border,
@@ -305,11 +309,13 @@ export function Segmented<T extends string>({
             accessibilityState={{ selected: active }}
             style={[
               styles.segment,
+              fullWidth && styles.segmentFull,
               { borderRadius: t.radius.pill },
               active ? [{ backgroundColor: t.colors.surface }, t.shadow.card] : null,
             ]}
           >
             <RNText
+              numberOfLines={1}
               style={[
                 t.typography.overline as TextStyle,
                 { color: active ? t.colors.text : t.colors.textSubtle },
@@ -369,7 +375,9 @@ const styles = StyleSheet.create({
     borderWidth: StyleSheet.hairlineWidth,
   },
   segmented: { flexDirection: 'row', alignSelf: 'center', padding: 3, borderWidth: StyleSheet.hairlineWidth },
+  segmentedFull: { alignSelf: 'stretch' },
   segment: { paddingHorizontal: 20, paddingVertical: 7 },
+  segmentFull: { flex: 1, paddingHorizontal: 10, alignItems: 'center' },
   badge: { paddingHorizontal: 7, paddingVertical: 3 },
   inputWrap: {
     flexDirection: 'row',

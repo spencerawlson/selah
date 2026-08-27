@@ -63,6 +63,9 @@ const STRINGS: Record<Locale, Dict> = {
     'today.signinPost': ' to keep notes and favorites.',
     'reader.immersion': 'Immersion',
     'reader.study': 'Study',
+    'reader.ot': 'Old Testament',
+    'reader.nt': 'New Testament',
+    'reader.chapter': 'Chapter',
     'inspector.title': 'Context Inspector',
     'inspector.emptyTitle': 'Explore the text',
     'inspector.emptyMsg':
@@ -173,6 +176,9 @@ const STRINGS: Record<Locale, Dict> = {
     'today.signinPost': ' pour garder notes et favoris.',
     'reader.immersion': 'Immersion',
     'reader.study': 'Étude',
+    'reader.ot': 'Ancien Testament',
+    'reader.nt': 'Nouveau Testament',
+    'reader.chapter': 'Chapitre',
     'inspector.title': 'Inspecteur de contexte',
     'inspector.emptyTitle': 'Explorer le texte',
     'inspector.emptyMsg':
@@ -284,6 +290,9 @@ const STRINGS: Record<Locale, Dict> = {
     'today.signinPost': ' para guardar notas y favoritos.',
     'reader.immersion': 'Inmersión',
     'reader.study': 'Estudio',
+    'reader.ot': 'Antiguo Testamento',
+    'reader.nt': 'Nuevo Testamento',
+    'reader.chapter': 'Capítulo',
     'inspector.title': 'Inspector de contexto',
     'inspector.emptyTitle': 'Explora el texto',
     'inspector.emptyMsg':
