@@ -9,7 +9,7 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import type { ExplanationWithVerse, Testament, Verse } from '@selah/shared';
+import type { ExplanationWithVerse, Testament, Tone, Verse } from '@selah/shared';
 import { useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { PanResponder, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
@@ -19,12 +19,17 @@ import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
 import { bookName, localBookName } from '@/data/bookNames';
 import { Glass } from '@/components/glass';
+import { tapFeedback } from '@/components/haptics';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Pill, Row, Segmented, Text } from '@/components/ui';
 import { ExplanationView, VerseLine } from '@/components/verse';
+import { VerseActionSheet } from '@/components/verseActions';
+import { useAuth } from '@/state/auth';
 import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useReader } from '@/state/reader';
 import { useTheme } from '@/theme';
+
+const TONES: Tone[] = ['plain', 'devotional', 'scholarly', 'kids'];
 
 const WIDE = 900;
 
@@ -36,6 +41,7 @@ export default function ReadScreen() {
   const wide = width >= WIDE;
   const { mode, setMode } = useReader();
   const { locale, t: tr } = useLocale();
+  const { isSignedIn } = useAuth();
   const immersion = mode === 'immersion';
 
   const [slug, setSlug] = useState('john');
@@ -43,9 +49,13 @@ export default function ReadScreen() {
   const [selected, setSelected] = useState<Verse | null>(null);
   const [explanation, setExplanation] = useState<ExplanationWithVerse | null>(null);
   const [explaining, setExplaining] = useState(false);
+  const [inspectorTone, setInspectorTone] = useState<Tone>('plain');
   const [testament, setTestament] = useState<Testament>('new');
   const [pickerOpen, setPickerOpen] = useState(true);
   const [relatedError, setRelatedError] = useState<string | null>(null);
+  // The verse whose action sheet is open (phones); null when closed.
+  const [sheetVerse, setSheetVerse] = useState<Verse | null>(null);
+  const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
 
   const books = useAsync((signal) => api.getBooks(signal), []);
   const chapters = useAsync((signal) => api.getChapters(slug, signal), [slug]);
@@ -80,6 +90,45 @@ export default function ReadScreen() {
     [chapterId, locale],
   );
 
+  // The reader's liked verses (their favorites), so hearts show filled state.
+  const favorites = useAsync(
+    (signal) => (isSignedIn ? api.getFavorites(signal) : Promise.resolve(null)),
+    [isSignedIn],
+  );
+  useEffect(() => {
+    setLikedIds(favorites.data ? new Set(favorites.data.items.map((f) => f.verse_id)) : new Set());
+  }, [favorites.data]);
+
+  const toggleLike = useCallback(
+    async (verseId: number) => {
+      if (!isSignedIn) {
+        router.push('/sign-in');
+        return;
+      }
+      tapFeedback();
+      const wasLiked = likedIds.has(verseId);
+      // Optimistic — flip immediately, roll back only if the call fails.
+      setLikedIds((prev) => {
+        const next = new Set(prev);
+        if (wasLiked) next.delete(verseId);
+        else next.add(verseId);
+        return next;
+      });
+      try {
+        if (wasLiked) await api.removeFavorite(verseId);
+        else await api.addFavorite(verseId);
+      } catch {
+        setLikedIds((prev) => {
+          const next = new Set(prev);
+          if (wasLiked) next.add(verseId);
+          else next.delete(verseId);
+          return next;
+        });
+      }
+    },
+    [isSignedIn, likedIds, router],
+  );
+
   // When navigation jumps into another book's chapter (e.g. tapping a related
   // verse in the inspector), keep the book + Testament picker in step with it.
   useEffect(() => {
@@ -92,24 +141,26 @@ export default function ReadScreen() {
   }, [chapter.data]);
 
   const openVerse = useCallback(
-    async (verse: Verse) => {
+    async (verse: Verse, tone: Tone = 'plain') => {
+      // On a phone there's no inspector — offer the verse's actions instead.
       if (!wide) {
-        router.push(`/verse/${verse.id}`);
+        setSheetVerse(verse);
         return;
       }
       setSelected(verse);
+      setInspectorTone(tone);
       setRelatedError(null);
       setExplaining(true);
       setExplanation(null);
       try {
-        setExplanation(await api.explainVerse({ verse_id: verse.id, tone: 'plain', language: locale }));
+        setExplanation(await api.explainVerse({ verse_id: verse.id, tone, language: locale }));
       } catch {
         setExplanation(null);
       } finally {
         setExplaining(false);
       }
     },
-    [wide, router, locale],
+    [wide, locale],
   );
 
   // Swipe left/right in the reader to move between the current book's chapters.
@@ -281,6 +332,8 @@ export default function ReadScreen() {
                   verse={verse}
                   selected={selected?.id === verse.id}
                   onPress={() => openVerse(verse)}
+                  liked={likedIds.has(verse.id)}
+                  onToggleLike={() => toggleLike(verse.id)}
                 />
               ))}
             </View>
@@ -292,9 +345,49 @@ export default function ReadScreen() {
       {wide ? (
         <Glass style={[styles.inspector, { borderLeftColor: t.colors.border }]}>
           <View style={[styles.inspectorHead, { borderBottomColor: t.colors.border }]}>
-            <Text variant="heading">{tr('inspector.title')}</Text>
+            <Row style={styles.between}>
+              <Text variant="heading">{tr('inspector.title')}</Text>
+              {selected ? (
+                <Row gap={16}>
+                  <Pressable
+                    onPress={() => toggleLike(selected.id)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      likedIds.has(selected.id) ? tr('verseact.unlike') : tr('verseact.like')
+                    }
+                  >
+                    <Ionicons
+                      name={likedIds.has(selected.id) ? 'heart' : 'heart-outline'}
+                      size={20}
+                      color={likedIds.has(selected.id) ? t.colors.accent : t.colors.textSubtle}
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => router.push(`/note/${selected.id}`)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel={tr('verseact.notes')}
+                  >
+                    <Ionicons name="create-outline" size={20} color={t.colors.textSubtle} />
+                  </Pressable>
+                </Row>
+              ) : null}
+            </Row>
           </View>
           <ScrollView contentContainerStyle={{ padding: t.spacing.lg }}>
+            {selected ? (
+              <Row gap={8} style={[styles.tones, { marginBottom: t.spacing.md }]}>
+                {TONES.map((tone) => (
+                  <Pill
+                    key={tone}
+                    label={tr(`tone.${tone}`)}
+                    selected={inspectorTone === tone}
+                    onPress={() => openVerse(selected, tone)}
+                  />
+                ))}
+              </Row>
+            ) : null}
             {explaining ? <GeneratingState /> : null}
             {!explaining && explanation ? (
               <ExplanationView
@@ -325,6 +418,28 @@ export default function ReadScreen() {
           </ScrollView>
         </Glass>
       ) : null}
+
+      {/* Verse actions (phones): like, study in a voice, or open in Notes. */}
+      <VerseActionSheet
+        verse={sheetVerse}
+        liked={sheetVerse ? likedIds.has(sheetVerse.id) : false}
+        onClose={() => setSheetVerse(null)}
+        onToggleLike={() => {
+          if (sheetVerse) toggleLike(sheetVerse.id);
+        }}
+        onStudy={(tone) => {
+          if (!sheetVerse) return;
+          const id = sheetVerse.id;
+          setSheetVerse(null);
+          router.push(`/verse/${id}?tone=${tone}`);
+        }}
+        onNotes={() => {
+          if (!sheetVerse) return;
+          const id = sheetVerse.id;
+          setSheetVerse(null);
+          router.push(`/note/${id}`);
+        }}
+      />
     </View>
   );
 }
@@ -351,5 +466,7 @@ const styles = StyleSheet.create({
   supNum: { fontSize: 12 },
   inspector: { width: 340, borderLeftWidth: StyleSheet.hairlineWidth },
   inspectorHead: { padding: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+  between: { justifyContent: 'space-between' },
+  tones: { flexWrap: 'wrap' },
   relatedError: { paddingHorizontal: 20, paddingBottom: 16 },
 });

@@ -35,10 +35,16 @@ export default function VerseScreen() {
   const { isSignedIn } = useAuth();
   const { locale, t: tr } = useLocale();
 
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, tone: toneParam } = useLocalSearchParams<{ id: string; tone?: string }>();
   const verseId = Number(id);
 
-  const [tone, setTone] = useState<Tone>('plain');
+  // Deep-linked from a verse's "Study in a voice" action.
+  const initialTone: Tone = (['plain', 'devotional', 'scholarly', 'kids'] as const).includes(
+    toneParam as Tone,
+  )
+    ? (toneParam as Tone)
+    : 'plain';
+  const [tone, setTone] = useState<Tone>(initialTone);
   const [explanation, setExplanation] = useState<ExplanationWithVerse | null>(null);
   const [generating, setGenerating] = useState(true);
   const [failure, setFailure] = useState<ApiError | null>(null);
@@ -156,22 +162,32 @@ export default function VerseScreen() {
         ) : null}
 
         {explanation && !generating ? (
-          <Row gap={8} style={{ marginTop: t.spacing.xl }}>
+          <>
+            <Row gap={8} style={{ marginTop: t.spacing.xl }}>
+              <Button
+                title={tr('verse.save')}
+                icon="bookmark-outline"
+                variant="secondary"
+                style={styles.action}
+                onPress={save}
+              />
+              <Button
+                title={tr('verse.regenerate')}
+                icon="refresh"
+                variant="ghost"
+                style={styles.action}
+                onPress={() => void explain(tone, true)}
+              />
+            </Row>
             <Button
-              title={tr('verse.save')}
-              icon="bookmark-outline"
+              title={tr('verseact.notes')}
+              icon="create-outline"
               variant="secondary"
-              style={styles.action}
-              onPress={save}
+              fullWidth
+              style={{ marginTop: t.spacing.md }}
+              onPress={() => router.push(`/note/${verseId}`)}
             />
-            <Button
-              title={tr('verse.regenerate')}
-              icon="refresh"
-              variant="ghost"
-              style={styles.action}
-              onPress={() => void explain(tone, true)}
-            />
-          </Row>
+          </>
         ) : null}
       </Screen>
     </>

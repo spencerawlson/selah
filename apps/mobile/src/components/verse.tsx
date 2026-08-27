@@ -179,15 +179,19 @@ export function VerseCard({
   );
 }
 
-/** One line in the chapter reader: hanging verse number, then the text. */
+/** One line in the chapter reader: hanging verse number, the text, and a heart. */
 export function VerseLine({
   verse,
   selected,
   onPress,
+  liked,
+  onToggleLike,
 }: {
   verse: Verse;
   selected?: boolean;
   onPress?: () => void;
+  liked?: boolean;
+  onToggleLike?: () => void;
 }) {
   const t = useTheme();
 
@@ -218,6 +222,22 @@ export function VerseLine({
       <Text variant="scripture" style={styles.verseText}>
         {verse.text}
       </Text>
+      {onToggleLike ? (
+        <Pressable
+          onPress={onToggleLike}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={liked ? 'Remove from favorites' : 'Add to favorites'}
+          accessibilityState={{ selected: !!liked }}
+          style={({ pressed }) => [styles.likeButton, { opacity: pressed ? 0.5 : 1 }]}
+        >
+          <Ionicons
+            name={liked ? 'heart' : 'heart-outline'}
+            size={17}
+            color={liked ? t.colors.accent : t.colors.textSubtle}
+          />
+        </Pressable>
+      ) : null}
     </Pressable>
   );
 }
@@ -369,6 +389,7 @@ const styles = StyleSheet.create({
   verseLine: { flexDirection: 'row', alignItems: 'flex-start' },
   verseNumber: { width: 26, paddingTop: 8 },
   verseText: { flex: 1 },
+  likeButton: { paddingTop: 7, paddingLeft: 10 },
   relatedCard: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   relatedBody: { flex: 1, gap: 2 },
   disclaimer: { marginTop: 4 },
