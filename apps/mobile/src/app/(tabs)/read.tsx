@@ -17,7 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
-import { bookName } from '@/data/bookNames';
+import { bookName, localBookName } from '@/data/bookNames';
 import { Glass } from '@/components/glass';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Pill, Row, Segmented, Text } from '@/components/ui';
@@ -45,6 +45,7 @@ export default function ReadScreen() {
   const [explaining, setExplaining] = useState(false);
   const [testament, setTestament] = useState<Testament>('new');
   const [pickerOpen, setPickerOpen] = useState(true);
+  const [relatedError, setRelatedError] = useState<string | null>(null);
 
   const books = useAsync((signal) => api.getBooks(signal), []);
   const chapters = useAsync((signal) => api.getChapters(slug, signal), [slug]);
@@ -79,6 +80,17 @@ export default function ReadScreen() {
     [chapterId, locale],
   );
 
+  // When navigation jumps into another book's chapter (e.g. tapping a related
+  // verse in the inspector), keep the book + Testament picker in step with it.
+  useEffect(() => {
+    const cd = chapter.data;
+    if (cd && cd.book_slug !== slug) {
+      setSlug(cd.book_slug);
+      const match = books.data?.find((b) => b.slug === cd.book_slug);
+      if (match) setTestament(match.testament);
+    }
+  }, [chapter.data]);
+
   const openVerse = useCallback(
     async (verse: Verse) => {
       if (!wide) {
@@ -86,6 +98,7 @@ export default function ReadScreen() {
         return;
       }
       setSelected(verse);
+      setRelatedError(null);
       setExplaining(true);
       setExplanation(null);
       try {
@@ -119,7 +132,9 @@ export default function ReadScreen() {
   ).current;
 
   const currentBook = books.data?.find((b) => b.slug === slug);
-  const currentBookName = bookName(slug, chapter.data?.book_name ?? currentBook?.name ?? '', locale);
+  const currentBookName = currentBook
+    ? localBookName(currentBook, locale)
+    : bookName(slug, chapter.data?.book_name ?? '', locale);
   const title = chapter.data
     ? `${bookName(chapter.data.book_slug, chapter.data.book_name, locale)} ${chapter.data.number}`
     : 'Reader';
@@ -187,7 +202,7 @@ export default function ReadScreen() {
                       .map((book) => (
                         <Pill
                           key={book.id}
-                          label={bookName(book.slug, book.name, locale)}
+                          label={localBookName(book, locale)}
                           selected={book.slug === slug}
                           onPress={() => setSlug(book.slug)}
                         />
@@ -287,12 +302,18 @@ export default function ReadScreen() {
                 onSelectRelated={async (reference) => {
                   try {
                     const target = await api.lookupVerse(reference, TRANSLATION_FOR[locale]);
-                    void openVerse(target);
+                    setChapterId(target.chapter_id); // show the passage in the reader
+                    void openVerse(target); // and its explanation in the inspector
                   } catch {
-                    /* not in the sample set */
+                    setRelatedError(reference);
                   }
                 }}
               />
+            ) : null}
+            {!explaining && relatedError ? (
+              <Text variant="caption" tone="danger" style={styles.relatedError}>
+                {tr('verse.notLoadedBody').replace('{ref}', relatedError)}
+              </Text>
             ) : null}
             {!explaining && !explanation ? (
               <EmptyState
@@ -330,4 +351,5 @@ const styles = StyleSheet.create({
   supNum: { fontSize: 12 },
   inspector: { width: 340, borderLeftWidth: StyleSheet.hairlineWidth },
   inspectorHead: { padding: 16, borderBottomWidth: StyleSheet.hairlineWidth },
+  relatedError: { paddingHorizontal: 20, paddingBottom: 16 },
 });

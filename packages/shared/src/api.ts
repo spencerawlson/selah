@@ -28,6 +28,9 @@ export interface Book {
   id: number;
   slug: string;
   name: string;
+  /** The book's name in French and Spanish, for a localized UI. */
+  name_fr: string;
+  name_es: string;
   abbreviation: string;
   /** The form used inside a citation: "Psalm", not "Psalms". */
   reference_name: string;

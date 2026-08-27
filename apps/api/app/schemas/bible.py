@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from pydantic import Field
+from pydantic import Field, computed_field
 
 from app.models.bible import Testament
 from app.schemas.common import ORMModel
+from app.services.canon import BY_SLUG
 
 
 class TranslationRead(ORMModel):
@@ -27,6 +28,20 @@ class BookRead(ORMModel):
     position: int
     chapter_count: int
     blurb: str | None = None
+
+    # The name in each supported language, so a localized UI can show the book
+    # in the reader's own tongue. Falls back to the English name if unknown.
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def name_fr(self) -> str:
+        canon = BY_SLUG.get(self.slug)
+        return canon.name_fr if canon else self.name
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def name_es(self) -> str:
+        canon = BY_SLUG.get(self.slug)
+        return canon.name_es if canon else self.name
 
 
 class ChapterRead(ORMModel):

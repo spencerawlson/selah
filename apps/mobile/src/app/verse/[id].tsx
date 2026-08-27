@@ -19,7 +19,7 @@ import { ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Button, Card, Pill, Row, Text } from '@/components/ui';
 import { ExplanationView } from '@/components/verse';
 import { useAuth } from '@/state/auth';
-import { useLocale } from '@/state/locale';
+import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
 
 const TONES: { value: Tone; label: string }[] = [
@@ -143,7 +143,7 @@ export default function VerseScreen() {
             onSelectRelated={async (reference) => {
               // Related verses are references, not ids — resolve, then navigate.
               try {
-                const target = await api.lookupVerse(reference);
+                const target = await api.lookupVerse(reference, TRANSLATION_FOR[locale]);
                 router.push(`/verse/${target.id}`);
               } catch {
                 Alert.alert(

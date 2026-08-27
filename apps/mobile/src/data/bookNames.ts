@@ -6,6 +6,8 @@
  * language the user chose. English falls through to whatever the API sent.
  */
 
+import type { Book } from '@selah/shared';
+
 import type { Locale } from '@/state/locale';
 
 const NAMES: Record<string, { fr: string; es: string }> = {
@@ -82,4 +84,17 @@ export function bookName(slug: string, fallback: string, locale: Locale): string
   if (locale === 'fr') return NAMES[slug]?.fr ?? fallback;
   if (locale === 'es') return NAMES[slug]?.es ?? fallback;
   return fallback;
+}
+
+/**
+ * Prefer the localized name the API now sends (`name_fr`/`name_es`); fall back
+ * to the local map so it still localizes against an older server, then English.
+ */
+export function localBookName(
+  book: Pick<Book, 'slug' | 'name' | 'name_fr' | 'name_es'>,
+  locale: Locale,
+): string {
+  if (locale === 'fr') return book.name_fr || NAMES[book.slug]?.fr || book.name;
+  if (locale === 'es') return book.name_es || NAMES[book.slug]?.es || book.name;
+  return book.name;
 }
