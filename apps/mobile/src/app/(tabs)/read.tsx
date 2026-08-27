@@ -17,6 +17,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
+import { bookName } from '@/data/bookNames';
 import { Glass } from '@/components/glass';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Pill, Row, Segmented, Text } from '@/components/ui';
@@ -118,8 +119,10 @@ export default function ReadScreen() {
   ).current;
 
   const currentBook = books.data?.find((b) => b.slug === slug);
-  const currentBookName = chapter.data?.book_name ?? currentBook?.name ?? '';
-  const title = chapter.data ? `${chapter.data.book_name} ${chapter.data.number}` : 'Reader';
+  const currentBookName = bookName(slug, chapter.data?.book_name ?? currentBook?.name ?? '', locale);
+  const title = chapter.data
+    ? `${bookName(chapter.data.book_slug, chapter.data.book_name, locale)} ${chapter.data.number}`
+    : 'Reader';
 
   return (
     <View style={[styles.root, { flexDirection: wide ? 'row' : 'column', backgroundColor: t.colors.background }]}>
@@ -184,7 +187,7 @@ export default function ReadScreen() {
                       .map((book) => (
                         <Pill
                           key={book.id}
-                          label={book.name}
+                          label={bookName(book.slug, book.name, locale)}
                           selected={book.slug === slug}
                           onPress={() => setSlug(book.slug)}
                         />
@@ -237,7 +240,8 @@ export default function ReadScreen() {
 
           {chapter.data && verses.data && verses.data.length > 0 ? (
             <Text variant="overline" tone="subtle" style={styles.range}>
-              {chapter.data.book_name} {chapter.data.number}:1–{verses.data.length}
+              {bookName(chapter.data.book_slug, chapter.data.book_name, locale)} {chapter.data.number}
+              :1–{verses.data.length}
             </Text>
           ) : null}
 
