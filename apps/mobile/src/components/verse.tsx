@@ -7,7 +7,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import type { ExplanationWithVerse, Verse } from '@selah/shared';
-import { Image, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
+import { ImageBackground, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
 
 import { FadeIn } from '@/components/motion';
 import { Badge, Card, Divider, Row, Text } from '@/components/ui';
@@ -36,8 +36,9 @@ export function VerseHero({
 }) {
   const t = useTheme();
 
-  // With a background image: the art fills the card, a bottom-weighted scrim
-  // keeps the verse legible, and everything on top goes white.
+  // With a background image: the verse is set in the middle of the art itself.
+  // A soft scrim — not a solid card — keeps it legible while the picture shows
+  // through, and everything on top goes white.
   if (image) {
     return (
       <Pressable
@@ -47,49 +48,30 @@ export function VerseHero({
         accessibilityLabel={onPress ? `${verse.reference}. ${verse.text}` : undefined}
         style={({ pressed }) => ({ opacity: pressed && onPress ? 0.92 : 1 })}
       >
-        <View
-          style={[
-            styles.imageCard,
-            {
-              backgroundColor: t.colors.surface,
-              borderColor: t.colors.border,
-              borderRadius: t.radius.xl,
-            },
-            t.shadow.card,
-          ]}
+        <ImageBackground
+          source={image}
+          resizeMode="cover"
+          style={[styles.imageArt, t.shadow.card]}
+          imageStyle={{ borderRadius: t.radius.xl }}
         >
-          <Image source={image} resizeMode="cover" style={styles.imageArt} />
-          <View style={styles.imageBody}>
-            <Row style={styles.between}>
-              <Text variant="overline" tone="accent">
-                {label.toUpperCase()}
-              </Text>
-              {date ? (
-                <Text variant="overline" tone="subtle">
-                  {date}
-                </Text>
-              ) : null}
-            </Row>
-            <Text
-              style={[styles.imageBodyVerse, { color: t.colors.text, fontFamily: t.fonts.serif }]}
-            >
-              {verse.text}
+          {/* Transparent backing: a gentle wash so white text reads on any art. */}
+          <View
+            pointerEvents="none"
+            style={[styles.imageScrim, { borderRadius: t.radius.xl }]}
+          />
+          <View style={styles.imageOverlay}>
+            <Text variant="overline" style={styles.imageLabel}>
+              {label.toUpperCase()}
             </Text>
-            <Row style={[styles.between, { marginTop: t.spacing.sm }]}>
-              <Text variant="callout" tone="muted">
+            <Text style={[styles.imageVerse, { fontFamily: t.fonts.serif }]}>{verse.text}</Text>
+            <Row gap={8} style={styles.imageFooter}>
+              <Text variant="callout" style={styles.imageRef}>
                 {verse.reference}
               </Text>
-              {onPress ? (
-                <Row gap={6}>
-                  <Text variant="callout" tone="accent">
-                    Explore
-                  </Text>
-                  <Ionicons name="arrow-forward" size={15} color={t.colors.accent} />
-                </Row>
-              ) : null}
+              {onPress ? <Ionicons name="arrow-forward" size={15} color="#FFFFFF" /> : null}
             </Row>
           </View>
-        </View>
+        </ImageBackground>
       </Pressable>
     );
   }
@@ -342,10 +324,47 @@ const styles = StyleSheet.create({
   quoteMark: { position: 'absolute', top: -22, right: 8, fontSize: 96, lineHeight: 96, opacity: 0.1 },
   heroVerse: { marginTop: 16, fontSize: 25, lineHeight: 37, letterSpacing: -0.2 },
   heroFooter: { marginTop: 20 },
-  imageCard: { borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
-  imageArt: { width: '100%', aspectRatio: 1.82 },
-  imageBody: { padding: 22 },
-  imageBodyVerse: { fontSize: 22, lineHeight: 32, letterSpacing: -0.2, marginTop: 12 },
+  imageArt: {
+    width: '100%',
+    // Locked to the source images' exact ratio (1408×768) so "cover" fills the
+    // card with no cropping at all — the whole picture always shows.
+    aspectRatio: 1.833,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  imageScrim: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(22,18,12,0.34)',
+  },
+  imageOverlay: { paddingHorizontal: 30, paddingVertical: 26, alignItems: 'center', gap: 14 },
+  imageLabel: {
+    color: 'rgba(255,255,255,0.92)',
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
+  imageVerse: {
+    fontSize: 21,
+    lineHeight: 31,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    letterSpacing: -0.2,
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 10,
+  },
+  imageFooter: { marginTop: 2 },
+  imageRef: {
+    color: 'rgba(255,255,255,0.92)',
+    textShadowColor: 'rgba(0,0,0,0.45)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 6,
+  },
   verseLine: { flexDirection: 'row', alignItems: 'flex-start' },
   verseNumber: { width: 26, paddingTop: 8 },
   verseText: { flex: 1 },
