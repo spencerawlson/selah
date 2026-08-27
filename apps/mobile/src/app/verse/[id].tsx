@@ -185,7 +185,7 @@ export default function VerseScreen() {
               variant="secondary"
               fullWidth
               style={{ marginTop: t.spacing.md }}
-              onPress={() => router.push(`/note/${verseId}`)}
+              onPress={() => router.navigate(`/notes?verse=${verseId}`)}
             />
           </>
         ) : null}

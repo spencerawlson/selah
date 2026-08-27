@@ -7,7 +7,7 @@
 
 import type { Note } from '@selah/shared';
 import { formatRelativeTime } from '@selah/shared';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
@@ -16,7 +16,7 @@ import * as api from '@/api/endpoints';
 import { useAsync } from '@/api/useAsync';
 import { Screen } from '@/components/screen';
 import { EmptyState, ErrorState, LoadingState, SignInPrompt } from '@/components/states';
-import { Button, Card, Row, Text } from '@/components/ui';
+import { Button, Card, Divider, Row, Text } from '@/components/ui';
 import { useAuth } from '@/state/auth';
 import { useLocale } from '@/state/locale';
 import { useTheme } from '@/theme';
@@ -25,15 +25,45 @@ export default function NotesScreen() {
   const t = useTheme();
   const router = useRouter();
   const { isSignedIn, isRestoring } = useAuth();
-  const { t: tr } = useLocale();
+  const { locale, t: tr } = useLocale();
+  // Arrived here from a verse's "Open in Notes" popup action.
+  const { verse: verseParam } = useLocalSearchParams<{ verse?: string }>();
+  const verseId = verseParam ? Number(verseParam) : null;
 
   const [draft, setDraft] = useState('');
   const [saving, setSaving] = useState(false);
+  const [aiBusy, setAiBusy] = useState(false);
 
   const { data, error, isLoading, isRefreshing, refresh } = useAsync(
     async (signal) => (isSignedIn ? api.getNotes(signal) : null),
     [isSignedIn],
   );
+  // The verse the note is being written around, if any.
+  const anchor = useAsync(
+    async (signal) => (verseId ? api.getVerse(verseId, signal) : null),
+    [verseId],
+  );
+
+  async function draftWithAI() {
+    if (!verseId) return;
+    setAiBusy(true);
+    try {
+      const explanation = await api.explainVerse({
+        verse_id: verseId,
+        tone: 'devotional',
+        language: locale,
+      });
+      const seed = `${explanation.summary}\n\n${explanation.application}`;
+      setDraft((current) => (current.trim() ? `${current.trim()}\n\n${seed}` : seed));
+    } catch (caught) {
+      Alert.alert(
+        tr('note.aiFailed'),
+        caught instanceof ApiError ? caught.message : tr('common.somethingWrong'),
+      );
+    } finally {
+      setAiBusy(false);
+    }
+  }
 
   async function save() {
     const body = draft.trim();
@@ -41,13 +71,13 @@ export default function NotesScreen() {
 
     setSaving(true);
     try {
-      await api.createNote({ body });
+      await api.createNote({ body, verse_id: verseId ?? undefined });
       setDraft('');
       refresh();
     } catch (caught) {
       Alert.alert(
-        'Could not save',
-        caught instanceof ApiError ? caught.message : 'Something went wrong.',
+        tr('note.saveFailed'),
+        caught instanceof ApiError ? caught.message : tr('common.somethingWrong'),
       );
     } finally {
       setSaving(false);
@@ -99,10 +129,20 @@ export default function NotesScreen() {
       refreshing={isRefreshing}
     >
       <Card style={{ gap: t.spacing.md, marginBottom: t.spacing.xl }}>
+        {anchor.data ? (
+          <>
+            <Text variant="overline" tone="accent">
+              {anchor.data.reference.toUpperCase()}
+            </Text>
+            <Text variant="quote">{anchor.data.text}</Text>
+            <Divider />
+          </>
+        ) : null}
+
         <TextInput
           value={draft}
           onChangeText={setDraft}
-          placeholder={tr('notes.placeholder')}
+          placeholder={tr('note.placeholder')}
           placeholderTextColor={t.colors.textSubtle}
           multiline
           accessibilityLabel="New note"
@@ -116,14 +156,36 @@ export default function NotesScreen() {
             },
           ]}
         />
-        <Button
-          title={tr('notes.save')}
-          icon="checkmark"
-          fullWidth
-          loading={saving}
-          disabled={!draft.trim()}
-          onPress={save}
-        />
+
+        {anchor.data ? (
+          <Row gap={10}>
+            <Button
+              title={tr('note.aiHelp')}
+              icon="sparkles-outline"
+              variant="secondary"
+              style={styles.action}
+              loading={aiBusy}
+              onPress={draftWithAI}
+            />
+            <Button
+              title={tr('notes.save')}
+              icon="checkmark"
+              style={styles.action}
+              loading={saving}
+              disabled={!draft.trim()}
+              onPress={save}
+            />
+          </Row>
+        ) : (
+          <Button
+            title={tr('notes.save')}
+            icon="checkmark"
+            fullWidth
+            loading={saving}
+            disabled={!draft.trim()}
+            onPress={save}
+          />
+        )}
       </Card>
 
       {isLoading ? <LoadingState /> : null}
@@ -179,4 +241,5 @@ export default function NotesScreen() {
 const styles = StyleSheet.create({
   input: { minHeight: 96, padding: 14, textAlignVertical: 'top' },
   between: { justifyContent: 'space-between' },
+  action: { flex: 1 },
 });

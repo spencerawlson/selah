@@ -66,6 +66,7 @@ export default function TabsLayout() {
           <Tabs.Screen name="read" options={{ title: 'Reader' }} />
           <Tabs.Screen name="study" options={{ title: 'Study' }} />
           <Tabs.Screen name="notes" options={{ title: 'Notes' }} />
+          <Tabs.Screen name="favorites" options={{ title: 'Favorites' }} />
           <Tabs.Screen name="profile" options={{ title: 'You' }} />
         </Tabs>
       </View>

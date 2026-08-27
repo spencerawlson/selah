@@ -23,7 +23,7 @@ import { tapFeedback } from '@/components/haptics';
 import { EmptyState, ErrorState, GeneratingState, LoadingState } from '@/components/states';
 import { Pill, Row, Segmented, Text } from '@/components/ui';
 import { ExplanationView, VerseLine } from '@/components/verse';
-import { VerseActionSheet } from '@/components/verseActions';
+import { VerseActions } from '@/components/verseActions';
 import { useAuth } from '@/state/auth';
 import { TRANSLATION_FOR, useLocale } from '@/state/locale';
 import { useReader } from '@/state/reader';
@@ -53,8 +53,8 @@ export default function ReadScreen() {
   const [testament, setTestament] = useState<Testament>('new');
   const [pickerOpen, setPickerOpen] = useState(true);
   const [relatedError, setRelatedError] = useState<string | null>(null);
-  // The verse whose action sheet is open (phones); null when closed.
-  const [sheetVerse, setSheetVerse] = useState<Verse | null>(null);
+  // The verse whose inline action popup is open; null when none.
+  const [openVerseId, setOpenVerseId] = useState<number | null>(null);
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
 
   const books = useAsync((signal) => api.getBooks(signal), []);
@@ -140,13 +140,10 @@ export default function ReadScreen() {
     }
   }, [chapter.data]);
 
+  // On wide screens the Context Inspector shows a live explanation of the verse.
   const openVerse = useCallback(
     async (verse: Verse, tone: Tone = 'plain') => {
-      // On a phone there's no inspector — offer the verse's actions instead.
-      if (!wide) {
-        setSheetVerse(verse);
-        return;
-      }
+      if (!wide) return;
       setSelected(verse);
       setInspectorTone(tone);
       setRelatedError(null);
@@ -161,6 +158,32 @@ export default function ReadScreen() {
       }
     },
     [wide, locale],
+  );
+
+  // Tapping a verse toggles its inline action popup (and, on wide, previews the
+  // explanation in the inspector).
+  const handleVersePress = useCallback(
+    (verse: Verse) => {
+      setOpenVerseId((current) => (current === verse.id ? null : verse.id));
+      if (wide) void openVerse(verse);
+    },
+    [wide, openVerse],
+  );
+
+  // The popup's actions route into the matching tabs.
+  const studyVerse = useCallback(
+    (verseId: number, tone: Tone) => {
+      setOpenVerseId(null);
+      router.navigate(`/study?verse=${verseId}&tone=${tone}`);
+    },
+    [router],
+  );
+  const noteVerse = useCallback(
+    (verseId: number) => {
+      setOpenVerseId(null);
+      router.navigate(`/notes?verse=${verseId}`);
+    },
+    [router],
   );
 
   // Swipe left/right in the reader to move between the current book's chapters.
@@ -327,14 +350,23 @@ export default function ReadScreen() {
           ) : (
             <View style={{ gap: t.spacing.sm }}>
               {verses.data?.map((verse) => (
-                <VerseLine
-                  key={verse.id}
-                  verse={verse}
-                  selected={selected?.id === verse.id}
-                  onPress={() => openVerse(verse)}
-                  liked={likedIds.has(verse.id)}
-                  onToggleLike={() => toggleLike(verse.id)}
-                />
+                <View key={verse.id}>
+                  <VerseLine
+                    verse={verse}
+                    selected={openVerseId === verse.id || selected?.id === verse.id}
+                    onPress={() => handleVersePress(verse)}
+                    liked={likedIds.has(verse.id)}
+                    onToggleLike={() => toggleLike(verse.id)}
+                  />
+                  {openVerseId === verse.id ? (
+                    <VerseActions
+                      liked={likedIds.has(verse.id)}
+                      onToggleLike={() => toggleLike(verse.id)}
+                      onStudy={(tone) => studyVerse(verse.id, tone)}
+                      onNotes={() => noteVerse(verse.id)}
+                    />
+                  ) : null}
+                </View>
               ))}
             </View>
           )}
@@ -364,7 +396,7 @@ export default function ReadScreen() {
                     />
                   </Pressable>
                   <Pressable
-                    onPress={() => router.push(`/note/${selected.id}`)}
+                    onPress={() => router.navigate(`/notes?verse=${selected.id}`)}
                     hitSlop={8}
                     accessibilityRole="button"
                     accessibilityLabel={tr('verseact.notes')}
@@ -418,28 +450,6 @@ export default function ReadScreen() {
           </ScrollView>
         </Glass>
       ) : null}
-
-      {/* Verse actions (phones): like, study in a voice, or open in Notes. */}
-      <VerseActionSheet
-        verse={sheetVerse}
-        liked={sheetVerse ? likedIds.has(sheetVerse.id) : false}
-        onClose={() => setSheetVerse(null)}
-        onToggleLike={() => {
-          if (sheetVerse) toggleLike(sheetVerse.id);
-        }}
-        onStudy={(tone) => {
-          if (!sheetVerse) return;
-          const id = sheetVerse.id;
-          setSheetVerse(null);
-          router.push(`/verse/${id}?tone=${tone}`);
-        }}
-        onNotes={() => {
-          if (!sheetVerse) return;
-          const id = sheetVerse.id;
-          setSheetVerse(null);
-          router.push(`/note/${id}`);
-        }}
-      />
     </View>
   );
 }

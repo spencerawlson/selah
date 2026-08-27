@@ -57,7 +57,6 @@ export default function RootLayout() {
             <Stack.Screen name="welcome" options={{ headerShown: false }} />
             <Stack.Screen name="chapter/[id]" options={{ title: '' }} />
             <Stack.Screen name="verse/[id]" options={{ title: 'Explanation' }} />
-            <Stack.Screen name="note/[verseId]" options={{ title: '' }} />
             <Stack.Screen
               name="share/[id]"
               options={{ presentation: 'modal', title: 'Share' }}

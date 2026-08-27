@@ -6,8 +6,8 @@
  */
 
 import type { Tone } from '@selah/shared';
-import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { ApiError } from '@/api/client';
@@ -37,6 +37,11 @@ export default function StudyScreen() {
   const t = useTheme();
   const router = useRouter();
   const { locale, t: tr } = useLocale();
+  // Arrived here from a verse's "Study in a voice" popup action.
+  const { verse: verseParam, tone: toneParam } = useLocalSearchParams<{
+    verse?: string;
+    tone?: string;
+  }>();
 
   const [query, setQuery] = useState('');
   const [tone, setTone] = useState<Tone>('plain');
@@ -82,6 +87,39 @@ export default function StudyScreen() {
       setFailure(null);
     }
   }
+
+  async function explainById(verseId: number, nextTone: Tone) {
+    setExplaining(true);
+    setFailure(null);
+    setExplanation(null);
+    try {
+      setExplanation(await api.explainVerse({ verse_id: verseId, tone: nextTone, language: locale }));
+    } catch (caught) {
+      setFailure(
+        caught instanceof ApiError
+          ? caught
+          : new ApiError('internal_error', 'Could not explain that verse.', 0),
+      );
+    } finally {
+      setExplaining(false);
+    }
+  }
+
+  // When a verse is handed in (with a voice), explain it straight away.
+  useEffect(() => {
+    if (!verseParam) return;
+    const vId = Number(verseParam);
+    if (!vId) return;
+    const nextTone: Tone = (['plain', 'devotional', 'scholarly', 'kids'] as const).includes(
+      toneParam as Tone,
+    )
+      ? (toneParam as Tone)
+      : 'plain';
+    setTone(nextTone);
+    setSubmitted(null);
+    void explainById(vId, nextTone);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verseParam, toneParam]);
 
   function changeTone(next: Tone) {
     setTone(next);

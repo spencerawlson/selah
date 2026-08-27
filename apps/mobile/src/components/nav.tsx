@@ -22,7 +22,7 @@ export const WIDE = 900;
 /** Sidebar width on wide screens. */
 export const SIDEBAR_W = 240;
 
-const ROUTES = ['index', 'read', 'study', 'notes', 'profile'] as const;
+const ROUTES = ['index', 'read', 'study', 'notes', 'favorites', 'profile'] as const;
 type RouteName = (typeof ROUTES)[number];
 
 const META: Record<
@@ -33,6 +33,7 @@ const META: Record<
   read: { titleKey: 'nav.reader', icon: 'book-outline', section: 'Library' },
   study: { titleKey: 'nav.study', icon: 'sparkles-outline', section: 'Library' },
   notes: { titleKey: 'nav.notes', icon: 'create-outline', section: 'Library' },
+  favorites: { titleKey: 'nav.favorites', icon: 'heart-outline', section: 'Library' },
   profile: { titleKey: 'nav.you', icon: 'person-outline', section: 'Account' },
 };
 
