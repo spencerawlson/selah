@@ -7,8 +7,7 @@
 
 import { Ionicons } from '@expo/vector-icons';
 import type { ExplanationWithVerse, Verse } from '@selah/shared';
-import { LinearGradient } from 'expo-linear-gradient';
-import { ImageBackground, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
+import { Image, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
 
 import { FadeIn } from '@/components/motion';
 import { Badge, Card, Divider, Row, Text } from '@/components/ui';
@@ -48,38 +47,49 @@ export function VerseHero({
         accessibilityLabel={onPress ? `${verse.reference}. ${verse.text}` : undefined}
         style={({ pressed }) => ({ opacity: pressed && onPress ? 0.92 : 1 })}
       >
-        <ImageBackground
-          source={image}
-          resizeMode="cover"
-          style={styles.imageHero}
-          imageStyle={{ borderRadius: t.radius.xl }}
+        <View
+          style={[
+            styles.imageCard,
+            {
+              backgroundColor: t.colors.surface,
+              borderColor: t.colors.border,
+              borderRadius: t.radius.xl,
+            },
+            t.shadow.card,
+          ]}
         >
-          <LinearGradient
-            colors={['rgba(18,13,6,0.05)', 'rgba(18,13,6,0.35)', 'rgba(18,13,6,0.82)']}
-            locations={[0, 0.45, 1]}
-            style={[StyleSheet.absoluteFill, { borderRadius: t.radius.xl }]}
-          />
-          <View style={styles.imageContent}>
-            <Text variant="overline" style={styles.imageLabel}>
-              {label.toUpperCase()}
-              {date ? `   ·   ${date}` : ''}
+          <Image source={image} resizeMode="cover" style={styles.imageArt} />
+          <View style={styles.imageBody}>
+            <Row style={styles.between}>
+              <Text variant="overline" tone="accent">
+                {label.toUpperCase()}
+              </Text>
+              {date ? (
+                <Text variant="overline" tone="subtle">
+                  {date}
+                </Text>
+              ) : null}
+            </Row>
+            <Text
+              style={[styles.imageBodyVerse, { color: t.colors.text, fontFamily: t.fonts.serif }]}
+            >
+              {verse.text}
             </Text>
-            <Text style={[styles.imageVerse, { fontFamily: t.fonts.serif }]}>{verse.text}</Text>
             <Row style={[styles.between, { marginTop: t.spacing.sm }]}>
-              <Text variant="callout" style={styles.imageRef}>
+              <Text variant="callout" tone="muted">
                 {verse.reference}
               </Text>
               {onPress ? (
                 <Row gap={6}>
-                  <Text variant="callout" style={styles.imageExplore}>
+                  <Text variant="callout" tone="accent">
                     Explore
                   </Text>
-                  <Ionicons name="arrow-forward" size={15} color="#FFFFFF" />
+                  <Ionicons name="arrow-forward" size={15} color={t.colors.accent} />
                 </Row>
               ) : null}
             </Row>
           </View>
-        </ImageBackground>
+        </View>
       </Pressable>
     );
   }
@@ -332,21 +342,10 @@ const styles = StyleSheet.create({
   quoteMark: { position: 'absolute', top: -22, right: 8, fontSize: 96, lineHeight: 96, opacity: 0.1 },
   heroVerse: { marginTop: 16, fontSize: 25, lineHeight: 37, letterSpacing: -0.2 },
   heroFooter: { marginTop: 20 },
-  imageHero: { minHeight: 440, justifyContent: 'flex-end', borderRadius: 24, overflow: 'hidden' },
-  imageContent: { padding: 24 },
-  imageLabel: { color: 'rgba(255,255,255,0.92)' },
-  imageVerse: {
-    fontSize: 23,
-    lineHeight: 33,
-    color: '#FFFFFF',
-    marginTop: 14,
-    letterSpacing: -0.2,
-    textShadowColor: 'rgba(0,0,0,0.45)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 8,
-  },
-  imageRef: { color: 'rgba(255,255,255,0.88)' },
-  imageExplore: { color: '#FFFFFF', fontWeight: '600' },
+  imageCard: { borderWidth: StyleSheet.hairlineWidth, overflow: 'hidden' },
+  imageArt: { width: '100%', aspectRatio: 1.82 },
+  imageBody: { padding: 22 },
+  imageBodyVerse: { fontSize: 22, lineHeight: 32, letterSpacing: -0.2, marginTop: 12 },
   verseLine: { flexDirection: 'row', alignItems: 'flex-start' },
   verseNumber: { width: 26, paddingTop: 8 },
   verseText: { flex: 1 },

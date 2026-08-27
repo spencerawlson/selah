@@ -20,8 +20,9 @@ export function Glass({
 }: ViewProps & { intensity?: number; sheen?: boolean }) {
   const t = useTheme();
   const dark = t.scheme === 'dark';
-  // ~80% opaque so scripture and labels stay legible over whatever is behind.
-  const wash = dark ? 'rgba(22,19,13,0.62)' : 'rgba(255,253,246,0.66)';
+  // Lumen's own cream (#fffdf8) at ~72% — the tint its sticky bars use, opaque
+  // enough that scripture and labels stay legible over whatever is behind.
+  const wash = dark ? 'rgba(22,19,13,0.62)' : 'rgba(255,253,248,0.72)';
 
   return (
     <View style={[styles.clip, style]} {...rest}>

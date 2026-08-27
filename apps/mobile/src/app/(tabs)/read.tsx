@@ -10,8 +10,8 @@
 
 import type { ExplanationWithVerse, Verse } from '@selah/shared';
 import { useRouter } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { PanResponder, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as api from '@/api/endpoints';
@@ -85,6 +85,25 @@ export default function ReadScreen() {
     [wide, router, locale],
   );
 
+  // Swipe left/right in the reader to move between the current book's chapters.
+  const chapterIds = chapters.data?.map((c) => c.id) ?? [];
+  const chapterIdx = chapterId ? chapterIds.indexOf(chapterId) : -1;
+  const navRef = useRef({ ids: chapterIds, idx: chapterIdx, set: setChapterId });
+  navRef.current = { ids: chapterIds, idx: chapterIdx, set: setChapterId };
+  const swipe = useRef(
+    PanResponder.create({
+      // Claim horizontal drags only, so vertical scrolling still works.
+      onMoveShouldSetPanResponder: (_e, g) =>
+        Math.abs(g.dx) > 24 && Math.abs(g.dx) > Math.abs(g.dy) * 1.6,
+      onPanResponderRelease: (_e, g) => {
+        const { ids, idx, set } = navRef.current;
+        if (idx < 0) return;
+        if (g.dx <= -60 && idx < ids.length - 1) set(ids[idx + 1]);
+        else if (g.dx >= 60 && idx > 0) set(ids[idx - 1]);
+      },
+    }),
+  ).current;
+
   const title = chapter.data ? `${chapter.data.book_name} ${chapter.data.number}` : 'Reader';
 
   return (
@@ -96,6 +115,7 @@ export default function ReadScreen() {
           paddingBottom: insets.bottom + 48,
           paddingHorizontal: 20,
         }}
+        {...swipe.panHandlers}
       >
         <View style={styles.column}>
           {/* Book switcher */}

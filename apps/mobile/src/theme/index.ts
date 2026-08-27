@@ -8,8 +8,6 @@
  * with the scheme); everything static stays in a module-level StyleSheet.
  */
 
-import { useColorScheme } from 'react-native';
-
 import { type ColorScheme, type Colors, palette } from './colors';
 import { fonts, radius, shadow, spacing, typography } from './tokens';
 
@@ -24,7 +22,8 @@ export interface Theme {
 }
 
 export function useTheme(): Theme {
-  const scheme: ColorScheme = useColorScheme() === 'dark' ? 'dark' : 'light';
+  // Selah is the Lumen light theme, always — deliberately not system-dependent.
+  const scheme: ColorScheme = 'light';
   return { scheme, colors: palette[scheme], spacing, radius, typography, fonts, shadow };
 }
 

@@ -1,8 +1,8 @@
 /**
  * Palette.
  *
- * The app is meant to feel like real paper: a soft, near-white linen page, ink
- * text, and a warm gold accent — the colour of the Selah mark itself.
+ * Selah wears the Lumen palette, light mode only: warm cream paper, ink text,
+ * a gold accent, and a soft gold verse highlight. Deliberately not dark-aware.
  * Scripture is always the highest-contrast thing on screen — chrome recedes.
  */
 
@@ -43,25 +43,28 @@ export interface Colors {
 }
 
 export const palette: Record<ColorScheme, Colors> = {
+  // Exact Lumen palette. Kept 1:1 with the Lumen mockup's CSS custom properties
+  // (--bg/--shell/--surface/--surface2/--ink/--muted/--line/--gold) plus its
+  // section-label, verse-highlight and vnum tints. Selah is Lumen, in light.
   light: {
-    background: '#F4EAD0',
-    surface: '#FCF7E6',
-    surfaceMuted: '#ECE0C4',
-    border: '#E3D6B7',
+    background: '#FAF8F3', //  --shell
+    surface: '#FFFDF8', //  --surface
+    surfaceMuted: '#F3EEE4', //  --surface2
+    border: '#DED7CA', //  --line
 
-    text: '#221E15',
-    textMuted: '#746A54',
-    textSubtle: '#A89B7E',
+    text: '#201D19', //  --ink
+    textMuted: '#777066', //  --muted
+    textSubtle: '#968B7B', //  .section-label
     textOnAccent: '#FFFFFF',
 
-    accent: '#A48350',
-    accentPressed: '#8A6A38',
-    accentMuted: '#EFE3C7',
+    accent: '#A48350', //  --gold
+    accentPressed: '#8A6E3D',
+    accentMuted: '#F2E9D8',
 
-    gold: '#A48350',
-    goldMuted: '#EFE3C7',
+    gold: '#A48350', //  --gold
+    goldMuted: '#F2E9D8',
 
-    highlight: '#F0E3BF',
+    highlight: '#F2E8D6', //  .verseblock.highlight
 
     danger: '#B3261E',
     dangerMuted: '#F6E5E0',
