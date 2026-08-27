@@ -41,7 +41,8 @@
           "imageWidth": 88
         }
       ],
-      "expo-sharing"
+      "expo-sharing",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": false,

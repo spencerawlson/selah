@@ -101,6 +101,7 @@ export default function WelcomeScreen() {
           label={tr('welcome.google')}
           onCredential={handleGoogleCredential}
           onUnavailable={() => setNote(tr('welcome.googleSetup'))}
+          onError={() => setNote(tr('welcome.googleError'))}
         />
 
         {note ? (

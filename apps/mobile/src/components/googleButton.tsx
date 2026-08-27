@@ -1,104 +1,78 @@
 /**
- * "Continue with Google".
+ * "Continue with Google" — web, iOS and Android.
  *
- * On the web, when EXPO_PUBLIC_GOOGLE_CLIENT_ID is set, this renders Google's
- * own Identity Services button and hands the resulting ID token up to the
- * caller (which trades it for a Selah session at POST /auth/google). No native
- * modules are pulled in, so the Metro bundle is unaffected.
+ * Uses expo-auth-session's Google provider to obtain an ID token, which the
+ * caller trades for a Selah session at POST /auth/google. One styled button on
+ * every platform. Enabled once the relevant client id is configured:
  *
- * When the client id is missing — or on native, where this web flow doesn't
- * apply — it shows a styled button that explains the one-time setup instead.
+ *   EXPO_PUBLIC_GOOGLE_CLIENT_ID          (web + Expo Go)
+ *   EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID      (standalone iOS)
+ *   EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID  (standalone Android)
+ *
+ * Without one it shows a stand-in that triggers the caller's setup note.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
+import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 import { Button } from '@/components/ui';
 
-const CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
-const GIS_SRC = 'https://accounts.google.com/gsi/client';
+// Completes the auth session when the browser redirects back (web + native).
+WebBrowser.maybeCompleteAuthSession();
 
-let gisPromise: Promise<void> | null = null;
+const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
+const IOS_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID;
+const ANDROID_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID;
 
-function loadGoogleScript(): Promise<void> {
-  if (typeof document === 'undefined') return Promise.reject(new Error('web only'));
-  if (gisPromise) return gisPromise;
-  gisPromise = new Promise<void>((resolve, reject) => {
-    if (document.querySelector(`script[src="${GIS_SRC}"]`)) {
-      resolve();
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = GIS_SRC;
-    script.async = true;
-    script.defer = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error('Failed to load Google Identity Services'));
-    document.head.appendChild(script);
-  });
-  return gisPromise;
-}
+const CONFIGURED =
+  Platform.OS === 'web' ? !!WEB_CLIENT_ID : !!(WEB_CLIENT_ID || IOS_CLIENT_ID || ANDROID_CLIENT_ID);
 
 export function GoogleButton({
   label,
   onCredential,
   onUnavailable,
+  onError,
 }: {
   label: string;
   onCredential: (idToken: string) => void;
   /** Pressed when Google isn't configured — the caller explains the setup. */
   onUnavailable: () => void;
+  onError?: () => void;
 }) {
-  const hostRef = useRef<View>(null);
-  const cbRef = useRef(onCredential);
-  cbRef.current = onCredential;
-  const [rendered, setRendered] = useState(false);
-
-  const configured = Platform.OS === 'web' && !!CLIENT_ID;
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    webClientId: WEB_CLIENT_ID,
+    iosClientId: IOS_CLIENT_ID,
+    androidClientId: ANDROID_CLIENT_ID,
+  });
 
   useEffect(() => {
-    if (!configured) return;
-    let cancelled = false;
-    loadGoogleScript()
-      .then(() => {
-        if (cancelled) return;
-        const google = (globalThis as { google?: any }).google;
-        const host = hostRef.current as unknown as HTMLElement | null;
-        if (!google?.accounts?.id || !host) return;
-        google.accounts.id.initialize({
-          client_id: CLIENT_ID,
-          callback: (response: { credential?: string }) => {
-            if (response?.credential) cbRef.current(response.credential);
-          },
-        });
-        google.accounts.id.renderButton(host, {
-          theme: 'outline',
-          size: 'large',
-          width: 300,
-          shape: 'pill',
-          text: 'continue_with',
-          logo_alignment: 'center',
-        });
-        setRendered(true);
-      })
-      .catch(() => setRendered(false));
-    return () => {
-      cancelled = true;
-    };
-  }, [configured]);
+    if (!response) return;
+    if (response.type === 'success') {
+      const idToken = response.params?.id_token ?? response.authentication?.idToken;
+      if (idToken) onCredential(idToken);
+      else onError?.();
+    } else if (response.type === 'error') {
+      onError?.();
+    }
+    // "dismiss"/"cancel" are silent — the reader backed out on purpose.
+  }, [response]);
 
-  if (configured) {
-    // Google renders its own button into this host once GIS loads.
-    return <View ref={hostRef} style={[styles.host, !rendered && styles.hidden]} />;
-  }
-
-  // Not configured (or native): a styled stand-in that triggers the setup note.
   return (
-    <Button title={label} icon="logo-google" variant="secondary" fullWidth onPress={onUnavailable} />
+    <Button
+      title={label}
+      icon="logo-google"
+      variant="secondary"
+      fullWidth
+      disabled={CONFIGURED && !request}
+      onPress={() => {
+        if (!CONFIGURED) {
+          onUnavailable();
+          return;
+        }
+        void promptAsync();
+      }}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  host: { alignItems: 'center', justifyContent: 'center', minHeight: 44 },
-  hidden: { opacity: 0 },
-});
