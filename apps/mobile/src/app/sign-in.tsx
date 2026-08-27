@@ -5,7 +5,7 @@
  * for no benefit at this size.
  */
 
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, StyleSheet, View } from 'react-native';
 
@@ -24,7 +24,8 @@ export default function SignInScreen() {
   const { signIn, signUp } = useAuth();
   const { t: tr } = useLocale();
 
-  const [mode, setMode] = useState<Mode>('sign-in');
+  const { mode: modeParam } = useLocalSearchParams<{ mode?: string }>();
+  const [mode, setMode] = useState<Mode>(modeParam === 'sign-up' ? 'sign-up' : 'sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');

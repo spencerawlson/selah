@@ -11,7 +11,13 @@ from fastapi import APIRouter, Depends, status
 from app.api.deps import CurrentUser, SessionDep
 from app.core.config import settings
 from app.core.ratelimit import RateLimit
-from app.schemas.auth import AuthSession, SignInRequest, SignUpRequest, UserRead
+from app.schemas.auth import (
+    AuthSession,
+    GoogleSignInRequest,
+    SignInRequest,
+    SignUpRequest,
+    UserRead,
+)
 from app.services import auth_service
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -52,6 +58,21 @@ async def sign_in(session: SessionDep, payload: SignInRequest) -> AuthSession:
     user, token, expires_in = await auth_service.sign_in(
         session, email=payload.email, password=payload.password
     )
+    return AuthSession(
+        access_token=token, expires_in=expires_in, user=UserRead.model_validate(user)
+    )
+
+
+@router.post(
+    "/google",
+    response_model=AuthSession,
+    summary="Sign in with Google",
+    dependencies=[Depends(_signin_limit)],
+)
+async def google(session: SessionDep, payload: GoogleSignInRequest) -> AuthSession:
+    """Exchange a Google ID token for a Selah session, creating the account on
+    first sign-in. Enabled only when GOOGLE_CLIENT_ID is configured."""
+    user, token, expires_in = await auth_service.google_sign_in(session, id_token=payload.id_token)
     return AuthSession(
         access_token=token, expires_in=expires_in, user=UserRead.model_validate(user)
     )

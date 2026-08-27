@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     # The scaffold ships a self-contained JWT provider. Point AUTH_PROVIDER at
     # "firebase" or "supabase" once you wire the real verifier in core/security.
     auth_provider: Literal["local", "firebase", "supabase"] = "local"
+    # "Continue with Google": the OAuth Web client ID from Google Cloud Console.
+    # Google sign-in is enabled only when this is set (the same value the app's
+    # EXPO_PUBLIC_GOOGLE_CLIENT_ID uses). Leave unset to disable it.
+    google_client_id: str | None = None
     # 32+ bytes, per RFC 7518 for HS256. Replace in every deployed environment.
     jwt_secret: str = _DEFAULT_JWT_SECRET
     jwt_algorithm: str = "HS256"

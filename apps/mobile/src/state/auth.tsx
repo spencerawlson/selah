@@ -21,6 +21,7 @@ interface AuthContextValue {
   isRestoring: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  signInWithGoogle: (idToken: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -81,6 +82,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [adopt],
   );
 
+  const signInWithGoogle = useCallback(
+    async (idToken: string) => {
+      await adopt(await api.signInWithGoogle(idToken));
+    },
+    [adopt],
+  );
+
   const signOut = useCallback(async () => {
     setAuthToken(null);
     await storage.removeItem(TOKEN_KEY);
@@ -88,8 +96,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isSignedIn: user !== null, isRestoring, signIn, signUp, signOut }),
-    [user, isRestoring, signIn, signUp, signOut],
+    () => ({
+      user,
+      isSignedIn: user !== null,
+      isRestoring,
+      signIn,
+      signUp,
+      signInWithGoogle,
+      signOut,
+    }),
+    [user, isRestoring, signIn, signUp, signInWithGoogle, signOut],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

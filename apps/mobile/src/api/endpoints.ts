@@ -115,4 +115,12 @@ export const signUp = (
 export const signIn = (payload: { email: string; password: string }, signal?: AbortSignal) =>
   request<AuthSession>('/auth/sign-in', { method: 'POST', body: payload, anonymous: true, signal });
 
+export const signInWithGoogle = (idToken: string, signal?: AbortSignal) =>
+  request<AuthSession>('/auth/google', {
+    method: 'POST',
+    body: { id_token: idToken },
+    anonymous: true,
+    signal,
+  });
+
 export const getMe = (signal?: AbortSignal) => request<User>('/auth/me', { signal });

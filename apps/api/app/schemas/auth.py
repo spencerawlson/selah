@@ -18,6 +18,12 @@ class SignInRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class GoogleSignInRequest(BaseModel):
+    """The ID token the Google Identity flow returns to the app."""
+
+    id_token: str = Field(min_length=16, max_length=4096)
+
+
 class UserRead(ORMModel):
     id: str
     email: str
