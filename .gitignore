@@ -42,3 +42,6 @@ yarn-error.log*
 # ---- Local data ----------------------------------------------------------
 /apps/api/selah.db
 /infra/postgres/data/
+
+# Local build-process notes. Kept on disk, never published.
+CLAUDE_CODE_*.md
